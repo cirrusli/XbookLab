@@ -35,7 +35,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
-import store from '../store'
+import { useUserStore } from '@/stores/user'
+import type { UserState } from '@/types/user'
+
+const userStore = useUserStore() as UserState
 const form = ref({
   username: '',
   password: '',
@@ -58,7 +61,7 @@ const handleSubmit = async () => {
     })
     
     localStorage.setItem('token', data.token)
-    store.commit('user/login', {
+    userStore.login({
       id: data.user.id,
       nickname: data.user.nickname,
       avatar: data.user.avatar,

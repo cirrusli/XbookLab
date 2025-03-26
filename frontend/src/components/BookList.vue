@@ -6,16 +6,6 @@
       :book-data="book"
       @click="handleCardClick(book.id)"
     />
-      <img :src="book.cover" class="book-cover" alt="图书封面" />
-      <div class="book-info">
-        <h3 class="book-title">{{ book.title }}</h3>
-        <div class="book-meta">
-          <span class="rating">★{{ book.rating }}</span>
-          <span class="category">{{ book.category }}</span>
-        </div>
-        <p class="book-desc">{{ book.description }}</p>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -47,12 +37,6 @@ const handleCardClick = (bookId: number) => {
 </script>
 
 <style scoped>
-.book-list {
-  display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-}
-
 .book-list {
   padding: 24px;
   display: grid;
