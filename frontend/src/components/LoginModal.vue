@@ -9,7 +9,25 @@
         <label>密码</label>
         <input v-model="form.password" type="password" required />
       </div>
-      <button type="submit" class="submit-btn">登录</button>
+      <div class="form-group">
+        <label>昵称</label>
+        <input v-model="form.nickname" type="text" required />
+      </div>
+      <div class="form-group">
+        <label>邮箱</label>
+        <input v-model="form.email" type="email" required />
+      </div>
+      <div class="form-group">
+        <label>个人简介</label>
+        <textarea v-model="form.bio" required></textarea>
+      </div>
+      <div v-if="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      <div class="button-group">
+        <button type="submit" class="submit-btn">登录</button>
+        <button type="button" class="register-btn" @click="handleRegister">注册</button>
+      </div>
     </form>
   </div>
 </template>
@@ -20,20 +38,58 @@ import axios from 'axios'
 import store from '../store'
 const form = ref({
   username: '',
-  password: ''
+  password: '',
+  nickname: '',
+  email: '',
+  avatar: 'https://randomuser.me/api/portraits/lego/1.jpg',
+  bio: ''
 })
+
+const errorMessage = ref('')
+
+import { defineEmits } from 'vue'
+const emit = defineEmits(['login-success'])
 
 const handleSubmit = async () => {
   try {
-    const response = await axios.post('/api/auth/login', form.value)
-    store.commit('login', {
-      user: response.data.user,
-      token: response.data.token
+    const { data } = await axios.post('/api/auth/login', {
+      username: form.value.username,
+      password: form.value.password
     })
+    
+    localStorage.setItem('token', data.token)
+    store.commit('user/login', {
+      id: data.user.id,
+      nickname: data.user.nickname,
+      avatar: data.user.avatar,
+      email: data.user.email
+    })
+    emit('login-success', data.user)
+    
   } catch (error) {
+    errorMessage.value = '用户名或密码错误'
     console.error('登录失败:', error)
   }
 }
+
+const handleRegister = async () => {
+  try {
+    await axios.post('/api/auth/register', {
+      username: form.value.username,
+      password: form.value.password,
+      nickname: form.value.nickname,
+      avatar: form.value.avatar,
+      bio: form.value.bio,
+      email: form.value.email
+    })
+    errorMessage.value = '注册成功，请登录'
+    await handleSubmit()
+  } catch (error) {
+    errorMessage.value = '注册失败，用户名可能已存在'
+    console.error('注册失败:', error)
+  }
+}
+
 </script>
 
 <style scoped>

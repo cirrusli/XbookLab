@@ -6,8 +6,12 @@
         <img src="https://picsum.photos/100/100" class="user-avatar" alt="头像">
       </div>
       <div class="user-info">
-        <h3 class="username">示例用户</h3>
-        <p class="bio">这个人很懒，什么都没有写～</p>
+        <h3 class="username">{{ user.nickname }}</h3>
+        <p class="bio">{{ user.bio || '这个人很懒，什么都没有写～' }}</p>
+        <div class="contact-info">
+          <span>用户名：{{ user.username }}</span>
+          <span>邮箱：{{ user.email }}</span>
+        </div>
       </div>
     </div>
     

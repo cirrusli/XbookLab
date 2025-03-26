@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "vue": "^3.4.0",
-    "vuex": "^4.1.0"
+    "pinia": "^2.0.33"
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",

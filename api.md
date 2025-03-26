@@ -19,14 +19,20 @@
   "token": "string",
   "user": {
     "id": "number",
-    "nickname": "string",
-    "avatar": "string"
+    "username": "string"
   }
 }
 ```
 
 ### 登出
 `POST /api/auth/logout`
+
+响应:
+```json
+{
+  "message": "登出成功"
+}
+```
 
 ## 图书相关
 
@@ -79,14 +85,38 @@
 
 ## 用户相关
 
-### 获取用户信息
-`GET /api/users/me`
+### 修改密码
+`POST /api/auth/change-password`
+
+请求参数:
+```json
+{
+  "oldPassword": "string",
+  "newPassword": "string"
+}
+```
 
 响应:
 ```json
 {
-  "id": "number",
-  "nickname": "string",
-  "avatar": "string"
+  "message": "密码修改成功"
+}
+```
+
+### 注册
+`POST /api/auth/register`
+
+请求参数:
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+响应:
+```json
+{
+  "message": "注册成功"
 }
 ```

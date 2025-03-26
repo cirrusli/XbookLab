@@ -64,8 +64,15 @@ func GetRecommendedBooks(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	categoryID := c.Query("categoryId")
+	
+	// 从上下文中获取用户ID
+	userID, _ := c.Get("userID")
+	var uid uint
+	if userID != nil {
+		uid = userID.(uint)
+	}
 
-	books, total := models.GetRecommendedBooks(page, pageSize, categoryID)
+	books, total := models.GetRecommendedBooks(page, pageSize, categoryID, uid)
 	c.JSON(http.StatusOK, gin.H{
 		"data":  books,
 		"total": total,

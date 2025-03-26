@@ -1,0 +1,17 @@
+:root {
+  --primary-color: #1890ff;
+  --secondary-color: #f56c6c;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-tertiary: #999;
+  --card-radius: 8px;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  --transition-base: all 0.2s ease-in-out;
+}
+
+/* 响应式断点 */
+@media (max-width: 768px) {
+  :root {
+    --card-radius: 4px;
+  }
+}

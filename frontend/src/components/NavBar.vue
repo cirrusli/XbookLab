@@ -1,25 +1,33 @@
 <template>
-  <div class="navbar">
-    <div class="nav-links">
-      <router-link v-for="link in navLinks" :key="link.path" :to="link.path">
-        {{ link.name }}
-      </router-link>
-    </div>
-    <div class="user-section">
-      <el-button v-if="!isLoggedIn" type="primary" @click="handleLogin">
-        登录
-      </el-button>
-      <div v-else class="user-profile">
-        <el-avatar :size="40" :src="user.avatar" />
-        <span class="username">{{ user.name }}</span>
+  <!-- 配置Element Plus中文语言包 -->
+  <el-config-provider :locale="zhCn">
+    <div class="navbar">
+      <div class="nav-links">
+        <router-link v-for="link in navLinks" :key="link.path" :to="link.path">
+          {{ link.name }}
+        </router-link>
+      </div>
+      <div class="user-section">
+        <el-button v-if="!isLoggedIn" type="primary" @click="handleLogin">
+          登录
+        </el-button>
+        <div v-else class="user-profile">
+          <el-avatar :size="40" :src="user.avatar" />
+          <span class="username">{{ user.name }}</span>
+        </div>
       </div>
     </div>
-  </div>
+    <LoginModal 
+      v-model="loginVisible"
+      @login-success="handleLoginSuccess"
+    />
+  </el-config-provider>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
+import { ArrowRight, User, Fire, Share, Connection } from '@element-plus/icons-vue';
 import { storeToRefs } from 'pinia';
 
 const userStore = useUserStore();
@@ -33,8 +41,17 @@ const navLinks = ref([
   { name: '随机匹配', path: '/random' },
 ]);
 
+import LoginModal from './LoginModal.vue';
+
+const loginVisible = ref(false);
+
 const handleLogin = () => {
-  // TODO: Implement login logic
+  loginVisible.value = true;
+};
+
+const handleLoginSuccess = (userData) => {
+  userStore.login(userData);
+  loginVisible.value = false;
 };
 </script>
 
@@ -57,6 +74,23 @@ const handleLogin = () => {
 .nav-links {
   display: flex;
   gap: 24px;
+  align-items: center;
+}
+
+.nav-item {
+  position: relative;
+  padding: 8px 0;
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 24px;
+  height: 3px;
+  background: #1890ff;
+  transform: translateX(-50%);
 }
 
 .nav-links a {

@@ -5,12 +5,6 @@ const route = useRoute()
 
 <template>
   <div class="home-container">
-    <!-- 修改$route为route -->
-    <div v-if="route.path === '/" class="recommend-layout">
-      <CategoryFilter class="filter-sidebar" />
-      <BookList class="book-list" />
-    </div>
-    
     <router-view />
   </div>
 </template>

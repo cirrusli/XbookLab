@@ -14,10 +14,10 @@ import (
 func initMySQL() *gorm.DB {
 	// 先连接无库名实例创建数据库
 	createDB, _ := gorm.Open(mysql.Open("root:password@tcp(localhost:3306)/?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
-	createDB.Exec("CREATE DATABASE IF NOT EXISTS book_community")
+	createDB.Exec("CREATE DATABASE IF NOT EXISTS x_book_lab")
 
 	// 连接目标数据库
-	dsn := "root:password@tcp(localhost:3306)/book_community?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:password@tcp(localhost:3306)/x_book_lab?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("MySQL连接失败:", err)
@@ -39,8 +39,8 @@ func main() {
 	_ = initRedis()
 
 	models.SetDB(db)
-
-	db.AutoMigrate(&models.Book{})
+	// 在 main 函数中添加
+	db.AutoMigrate(&models.Book{}, &models.User{}, &models.UserBookInteraction{})
 
 	r := SetupRouter(db)
 	if err := r.Run(":8000"); err != nil {

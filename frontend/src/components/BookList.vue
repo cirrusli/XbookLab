@@ -1,6 +1,11 @@
 <template>
   <div class="book-list">
-    <div v-for="book in books" :key="book.id" class="book-card">
+    <BookCard 
+      v-for="book in books" 
+      :key="book.id"
+      :book-data="book"
+      @click="handleCardClick(book.id)"
+    />
       <img :src="book.cover" class="book-cover" alt="图书封面" />
       <div class="book-info">
         <h3 class="book-title">{{ book.title }}</h3>
@@ -19,9 +24,11 @@ interface Book {
   id: number
   title: string
   cover: string
-  rating: number
-  category: string
-  description: string
+  author: string
+  press: string
+  tags: string[]
+  collects: number
+  discussions: number
 }
 
 import type { PropType } from 'vue'
@@ -32,6 +39,11 @@ defineProps({
     required: true
   }
 })
+
+const handleCardClick = (bookId: number) => {
+  // 处理图书卡片点击事件
+  console.log('Navigate to book detail:', bookId)
+}
 </script>
 
 <style scoped>
@@ -41,12 +53,17 @@ defineProps({
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
-.book-card {
-  background: white;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
+.book-list {
+  padding: 24px;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .book-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .book-card:hover {

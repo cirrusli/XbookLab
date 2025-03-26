@@ -2,6 +2,7 @@ package models
 
 import (
 	"gorm.io/gorm"
+	"strconv"
 )
 
 type Book struct {
@@ -14,14 +15,26 @@ type Book struct {
 	CategoryID  uint    `gorm:"index"`
 }
 
-func GetRecommendedBooks(page, pageSize int, categoryID string) ([]Book, int64) {
+func GetRecommendedBooks(page, pageSize int, categoryID string, userID uint) ([]Book, int64) {
 	var books []Book
 	var total int64
 	
-	query := DB.Model(&Book{})
+	// 如果有登录用户，使用协同过滤推荐
+	if userID > 0 {
+		recommendedBooks, err := GetUserBasedCFRecommendations(userID, pageSize)
+		if err == nil && len(recommendedBooks) > 0 {
+			books = recommendedBooks
+			total = int64(len(books))
+			return books, total
+		}
+	}
+	
+	// 如果没有登录用户或推荐失败，使用默认推荐(按评分排序)
+	query := DB.Model(&Book{}).Order("rating DESC")
 	
 	if categoryID != "" {
-		query = query.Where("category_id = ?", categoryID)
+		cid, _ := strconv.Atoi(categoryID)
+		query = query.Where("category_id = ?", cid)
 	}
 	
 	query.Count(&total)

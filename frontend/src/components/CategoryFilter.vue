@@ -17,7 +17,8 @@
         :class="{ 'active': selectedCategory === category.id }"
         @click="selectCategory(category.id)"
       >
-        {{ category.name }}
+        <span class="category-name">{{ category.name }}</span>
+<span class="book-count">{{ category.count }}</span>
       </div>
     </div>
   </div>
@@ -29,15 +30,16 @@ import { ref, computed } from 'vue'
 interface Category {
   id: number
   name: string
+  count: number
 }
 
 const categories = ref<Category[]>([
-  { id: 1, name: '文学小说' },
-  { id: 2, name: '科技前沿' },
-  { id: 3, name: '历史人文' },
-  { id: 4, name: '经济管理' },
-  { id: 5, name: '生活艺术' },
-  { id: 6, name: '心理成长' },
+  { id: 1, name: '文学小说', count: 0 },
+  { id: 2, name: '科技前沿', count: 0 },
+  { id: 3, name: '历史人文', count: 0 },
+  { id: 4, name: '经济管理', count: 0 },
+  { id: 5, name: '生活艺术', count: 0 },
+  { id: 6, name: '心理成长', count: 0 },
 ])
 
 const searchQuery = ref('')
@@ -85,12 +87,29 @@ const selectCategory = (id: number) => {
 }
 
 .category-item {
-  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
   margin: 8px 0;
-  border-radius: 6px;
+  background: white;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition-base);
   cursor: pointer;
-  transition: all 0.2s;
-  background: #f8f9fa;
+}
+
+.category-item:hover {
+  transform: translateY(-2px);
+}
+
+.category-item.active {
+  border-left: 4px solid var(--primary-color);
+}
+
+.book-count {
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 
 .category-item:hover {
