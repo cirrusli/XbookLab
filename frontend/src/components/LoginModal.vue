@@ -50,7 +50,6 @@ const form = ref({
 
 const errorMessage = ref('')
 
-import { defineEmits } from 'vue'
 const emit = defineEmits(['login-success'])
 
 const handleSubmit = async () => {

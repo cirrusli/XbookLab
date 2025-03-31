@@ -29,23 +29,26 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { Star, ChatDotRound } from '@element-plus/icons-vue';
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Star, ChatDotRound } from '@element-plus/icons-vue'
 
-const props = defineProps({
+defineProps({
   book: {
     type: Object,
     required: true
   }
-});
+})
 
-const handleMouseMove = (e) => {
-  const card = e.currentTarget;
-  const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-  const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-  card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-};
+const mouseX = ref(0)
+const mouseY = ref(0)
+
+const handleMouseMove = (e: MouseEvent) => {
+  const card = e.currentTarget as HTMLElement
+  const rect = card.getBoundingClientRect()
+  mouseX.value = (e.clientX - rect.left) / rect.width
+  mouseY.value = (e.clientY - rect.top) / rect.height
+}
 </script>
 
 <style scoped>
@@ -53,9 +56,11 @@ const handleMouseMove = (e) => {
   width: 100%;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  transform: perspective(1000px) rotateX(0) rotateY(0);
+  transform-style: preserve-3d;
   cursor: pointer;
 }
 

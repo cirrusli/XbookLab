@@ -1,29 +1,3 @@
-<template>
-  <!-- 配置Element Plus中文语言包 -->
-  <el-config-provider :locale="zhCn">
-    <div class="navbar">
-      <div class="nav-links">
-        <router-link v-for="link in navLinks" :key="link.path" :to="link.path">
-          {{ link.name }}
-        </router-link>
-      </div>
-      <div class="user-section">
-        <el-button v-if="!isLoggedIn" type="primary" @click="handleLogin">
-          登录
-        </el-button>
-        <div v-else class="user-profile">
-          <el-avatar :size="40" :src="user.avatar" />
-          <span class="username">{{ user.name }}</span>
-        </div>
-      </div>
-    </div>
-    <LoginModal 
-      v-model="loginVisible"
-      @login-success="handleLoginSuccess"
-    />
-  </el-config-provider>
-</template>
-
 <script setup>
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
@@ -33,7 +7,7 @@ import { storeToRefs } from 'pinia';
 const userStore = useUserStore();
 const { isLoggedIn, user } = storeToRefs(userStore);
 
-const navLinks = ref([
+const navItems = ref([
   { name: '推荐', path: '/' },
   { name: '兴趣小组', path: '/groups' },
   { name: '热榜', path: '/hot' },
@@ -54,6 +28,36 @@ const handleLoginSuccess = (userData) => {
   loginVisible.value = false;
 };
 </script>
+
+<template>
+  <div class="navbar">
+    <div class="nav-links">
+      <router-link 
+        v-for="item in navItems" 
+        :key="item.value"
+        :to="item.path"
+        class="nav-item"
+        :class="{ active: activeTab === item.value }"
+      >
+        {{ item.name }}
+      </router-link>
+    </div>
+    
+    <div class="user-section">
+      <template v-if="userStore.isLoggedIn">
+        <div class="user-profile">
+          <el-avatar :size="32" :src="userStore.avatar" />
+          <span class="username">{{ userStore.nickname }}</span>
+        </div>
+      </template>
+      <template v-else>
+        <ElButton type="primary" size="small" @click="userStore.showLogin = true">
+          登录
+        </ElButton>
+      </template>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .navbar {
@@ -80,6 +84,13 @@ const handleLoginSuccess = (userData) => {
 .nav-item {
   position: relative;
   padding: 8px 0;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-item.active {
+  color: #1890ff;
 }
 
 .nav-item.active::after {
@@ -91,16 +102,6 @@ const handleLoginSuccess = (userData) => {
   height: 3px;
   background: #1890ff;
   transform: translateX(-50%);
-}
-
-.nav-links a {
-  color: #333;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.nav-links a.router-link-active {
-  color: #1890ff;
 }
 
 .user-section {
