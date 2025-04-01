@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadSocial - 阅读社交平台</title>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-color: #42b983;
+            --primary-light: #f0faf3;
+            --bg-color: #f5f5f1;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #e1e1e1;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--primary-light);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 0 5%;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 24px;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .nav-links a {
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links .active {
+            color: var(--primary-color);
+        }
+
+        .nav-links .active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .login-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .login-btn:hover {
+            background-color: #3aa876;
+            transform: translateY(-1px);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 8px;
+            object-fit: cover;
+        }
+
+        .username {
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-container {
+            display: grid;
+            grid-template-columns: 25% 75%;
+            gap: 24px;
+            padding: 24px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--card-shadow);
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .sidebar-title::after {
+            content: '▼';
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .sidebar-title.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .tag:hover,
+        .tag.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .settings-btn {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .settings-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Right Content */
+        .content-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background-color: var(--primary-color);
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        /* Topic Cards */
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .topic-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .topic-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .topic-excerpt {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .topic-meta {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .topic-likes {
+            display: flex;
+            align-items: center;
+            margin-right: 12px;
+        }
+
+        .topic-likes::before {
+            content: '♥';
+            color: #ff4757;
+            margin-right: 4px;
+        }
+
+        /* Book List */
+        .book-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 24px;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .book-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+
+        .book-info {
+            padding: 12px;
+        }
+
+        .book-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .book-author {
+            color: var(--text-light);
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .book-rating {
+            color: #f39c12;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .book-desc {
+            font-size: 12px;
+            color: var(--text-light);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.2);
+        }
+
+        .modal-footer {
+            padding: 0 20px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #3aa876;
+            transform: translateY(-1px);
+        }
+
+        /* Match Modal */
+        .match-modal {
+            width: 500px;
+        }
+
+        .match-user {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .match-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 16px;
+            border: 3px solid var(--primary-color);
+        }
+
+        .match-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .match-bio {
+            color: var(--text-light);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .match-books {
+            width: 100%;
+        }
+
+        .match-books-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+        }
+
+        .match-book-list {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .match-book {
+            flex: 0 0 80px;
+        }
+
+        .match-book-cover {
+            width: 80px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .match-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .match-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .match-btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .match-btn-primary:hover {
+            background-color: #3aa876;
+        }
+
+        .match-btn-outline {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .match-btn-outline:hover {
+            background-color: var(--primary-light);
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 992px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .topic-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .book-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+                background: none;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+            }
+
+            .topic-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .book-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .book-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Social Login Styles */
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .social-btn img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .social-btn.google:hover {
+            background: #f1f1f1;
+        }
+
+        .social-btn.wechat {
+            background: #07C160;
+            color: white;
+            border-color: #07C160;
+        }
+
+        .social-btn.wechat:hover {
+            background: #06AD56;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: var(--text-light);
+        }
+
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        .forgot-password {
+            font-size: 13px;
+            color: var(--primary-color);
+        }
+
+        .signup-text {
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .signup-text a {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li class="active"><a href="#">推荐</a></li>
+                <li><a href="/groups">兴趣小组</a></li>
+                <li><a href="/hot">热榜</a></li>
+                <li><a href="/friends">好友在读</a></li>
+                <li><a href="#" id="match-trigger">书友匹配</a></li>
+            </ul>
+            <div class="user-section">
+                <button class="login-btn" id="login-btn">登录</button>
+                <div class="user-profile" id="user-profile" style="display: none;">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User Avatar" class="user-avatar">
+                    <span class="username">书友小美</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">分类筛选</h3>
+                <div class="tag-cloud">
+                    <span class="tag active">全部</span>
+                    <span class="tag">文学</span>
+                    <span class="tag">科技</span>
+                    <span class="tag">历史</span>
+                    <span class="tag">心理学</span>
+                    <span class="tag">小说</span>
+                    <span class="tag">传记</span>
+                    <span class="tag">艺术</span>
+                    <span class="tag">哲学</span>
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <button class="settings-btn">个性化设置</button>
+            </div>
+        </aside>
+
+        <!-- Right Content -->
+        <div class="content">
+            <section class="content-section">
+                <h2 class="section-title">热门话题</h2>
+                <div class="topic-grid" id="topic-grid">
+                    <!-- Topics will be inserted here by JS -->
+                </div>
+            </section>
+
+            <section class="content-section">
+                <h2 class="section-title">为你推荐</h2>
+                <div class="book-list" id="book-list">
+                    <!-- Books will be inserted here by JS -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">欢迎来到ReadSocial</h3>
+                <button class="close-btn" id="close-login">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="social-login">
+                    <button class="social-btn google">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+                            alt="Google">
+                        使用Google登录
+                    </button>
+                    <button class="social-btn wechat">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/73/Weixin.svg" alt="WeChat">
+                        使用微信登录
+                    </button>
+                </div>
+                <div class="divider">
+                    <span>或</span>
+                </div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email" class="form-label">电子邮箱</label>
+                        <input type="email" id="email" class="form-input" placeholder="请输入您的邮箱">
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">密码</label>
+                        <input type="password" id="password" class="form-input" placeholder="请输入密码">
+                    </div>
+                    <div class="form-footer">
+                        <a href="#" class="forgot-password">忘记密码?</a>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="submit-btn" id="submit-login">登录</button>
+                <p class="signup-text">还没有账号? <a href="#" id="signup-link">立即注册</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Modal -->
+    <div class="modal-overlay" id="match-modal">
+        <div class="modal match-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">找到匹配书友</h3>
+                <button class="close-btn" id="close-match">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="match-user">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Match Avatar" class="match-avatar">
+                    <h4 class="match-name">读书达人</h4>
+                    <p class="match-bio">热爱文学与历史，喜欢分享阅读心得</p>
+
+                    <div class="match-books">
+                        <h5 class="match-books-title">TA最近在读</h5>
+                        <div class="match-book-list">
+                            <div class="match-book">
+                                <img src="https://img9.doubanio.com/view/subject/s/public/s33834057.jpg"
+                                    alt="Book Cover" class="match-book-cover">
+                            </div>
+                            <div class="match-book">
+                                <img src="https://img9.doubanio.com/view/subject/s/public/s29909324.jpg"
+                                    alt="Book Cover" class="match-book-cover">
+                            </div>
+                            <div class="match-book">
+                                <img src="https://img1.doubanio.com/view/subject/s/public/s33575922.jpg"
+                                    alt="Book Cover" class="match-book-cover">
+                            </div>
+                            <div class="match-book">
+                                <img src="https://img2.doubanio.com/view/subject/s/public/s33834053.jpg"
+                                    alt="Book Cover" class="match-book-cover">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="match-actions">
+                        <button class="match-btn match-btn-primary">关注</button>
+                        <button class="match-btn match-btn-outline">换一个</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data
+        const topics = [
+            {
+                id: 1,
+                title: "如何培养深度阅读的习惯？",
+                excerpt: "在这个信息爆炸的时代，我们越来越难以专注阅读一本书。分享一些我实践过的深度阅读方法...",
+                likes: 245,
+                category: "阅读方法"
+            },
+            {
+                id: 2,
+                title: "2023年最值得阅读的10本科技书籍",
+                excerpt: "从人工智能到量子计算，这些书将带你了解科技前沿的发展趋势...",
+                likes: 189,
+                category: "科技"
+            },
+            {
+                id: 3,
+                title: "村上春树新作《城市与它的不确定的墙》读后感",
+                excerpt: "时隔多年，村上春树再次带来一部充满隐喻与哲思的长篇小说...",
+                likes: 320,
+                category: "文学"
+            },
+            {
+                id: 4,
+                title: "心理学入门：从这5本书开始",
+                excerpt: "想了解心理学却不知从何开始？这些入门书籍将为你打开心理学的大门...",
+                likes: 156,
+                category: "心理学"
+            },
+            {
+                id: 5,
+                title: "历史小说中的真实与虚构",
+                excerpt: "探讨历史小说如何在尊重史实的基础上进行艺术创作...",
+                likes: 98,
+                category: "历史"
+            },
+            {
+                id: 6,
+                title: "科幻小说对未来科技的预测准确吗？",
+                excerpt: "从《1984》到《神经漫游者》，科幻作品中的哪些预测已经成为现实...",
+                likes: 210,
+                category: "科技"
+            }
+        ];
+
+        const books = [
+            {
+                id: 1,
+                title: "百年孤独",
+                author: "加西亚·马尔克斯",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s6384944.jpg",
+                rating: "9.3",
+                desc: "魔幻现实主义文学的代表作，讲述布恩迪亚家族七代人的传奇故事。"
+            },
+            {
+                id: 2,
+                title: "人类简史",
+                author: "尤瓦尔·赫拉利",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s27814883.jpg",
+                rating: "9.1",
+                desc: "从认知革命到科学革命，重新审视人类历史的发展脉络。"
+            },
+            {
+                id: 3,
+                title: "三体",
+                author: "刘慈欣",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s2768378.jpg",
+                rating: "8.8",
+                desc: "中国科幻文学的里程碑之作，讲述地球文明与三体文明的接触与冲突。"
+            },
+            {
+                id: 4,
+                title: "活着",
+                author: "余华",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s29053580.jpg",
+                rating: "9.4",
+                desc: "讲述一个人在中国社会变革中的苦难与坚韧。"
+            },
+            {
+                id: 5,
+                title: "原则",
+                author: "瑞·达利欧",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s29651109.jpg",
+                rating: "8.4",
+                desc: "桥水基金创始人分享他的生活和工作原则。"
+            },
+            {
+                id: 6,
+                title: "小王子",
+                author: "圣埃克苏佩里",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s1103152.jpg",
+                rating: "9.0",
+                desc: "一部写给大人的童话，探讨爱与责任的真谛。"
+            },
+            {
+                id: 7,
+                title: "思考，快与慢",
+                author: "丹尼尔·卡尼曼",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s6907698.jpg",
+                rating: "8.1",
+                desc: "诺贝尔经济学奖得主揭示人类思维的两种系统。"
+            },
+            {
+                id: 8,
+                title: "沉默的大多数",
+                author: "王小波",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s1447349.jpg",
+                rating: "9.1",
+                desc: "王小波杂文代表作，展现其独特的思想与文风。"
+            },
+            {
+                id: 9,
+                title: "局外人",
+                author: "阿尔贝·加缪",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s4468484.jpg",
+                rating: "9.0",
+                desc: "存在主义文学的代表作，讲述一个局外人的故事。"
+            },
+            {
+                id: 10,
+                title: "未来简史",
+                author: "尤瓦尔·赫拉利",
+                cover: "https://img9.doubanio.com/view/subject/s/public/s29287103.jpg",
+                rating: "8.4",
+                desc: "探讨人类未来可能面临的重大变革与挑战。"
+            }
+        ];
+
+        // DOM Elements
+        const topicGrid = document.getElementById('topic-grid');
+        const bookList = document.getElementById('book-list');
+        const loginBtn = document.getElementById('login-btn');
+        const userProfile = document.getElementById('user-profile');
+        const loginModal = document.getElementById('login-modal');
+        const closeLogin = document.getElementById('close-login');
+        const submitLogin = document.getElementById('submit-login');
+        const matchModal = document.getElementById('match-modal');
+        const matchTrigger = document.getElementById('match-trigger');
+        const closeMatch = document.getElementById('close-match');
+        const navLinks = document.querySelectorAll('.nav-links li');
+        const sidebarTitles = document.querySelectorAll('.sidebar-title');
+        const tags = document.querySelectorAll('.tag');
+
+        // Render Topics
+        function renderTopics() {
+            topicGrid.innerHTML = '';
+            topics.forEach(topic => {
+                const topicElement = document.createElement('div');
+                topicElement.className = 'topic-card';
+                topicElement.innerHTML = `
+            <a href="/topic/${topic.id}">
+                <h3 class="topic-title">${topic.title}</h3>
+                <p class="topic-excerpt">${topic.excerpt}</p>
+                <div class="topic-meta">
+                    <span class="topic-likes">${topic.likes}</span>
+                    <span class="topic-category">${topic.category}</span>
+                </div>
+            </a>
+        `;
+                topicGrid.appendChild(topicElement);
+            });
+        }
+
+        // Render Books
+        function renderBooks() {
+            bookList.innerHTML = '';
+            books.forEach(book => {
+                const bookElement = document.createElement('div');
+                bookElement.className = 'book-card';
+                bookElement.innerHTML = `
+            <a href="/book/${book.id}">
+                <img src="${book.cover}" alt="${book.title}" class="book-cover">
+            </a>
+            <div class="book-info">
+                <h3 class="book-title"><a href="/book/${book.id}">${book.title}</a></h3>
+                <p class="book-author">${book.author}</p>
+                <p class="book-rating">${book.rating}</p>
+                <p class="book-desc">${book.desc}</p>
+            </div>
+        `;
+                bookList.appendChild(bookElement);
+            });
+        }
+        function handleRoute(path) {
+            // 在实际应用中，这里应该使用前端路由库如Vue Router
+            // 这里简单模拟路由跳转
+            switch (path) {
+                case '/':
+                    console.log('显示首页内容');
+                    break;
+                case '/groups':
+                    console.log('显示兴趣小组页面');
+                    break;
+                case '/hot':
+                    console.log('显示热榜页面');
+                    break;
+                case '/friends':
+                    console.log('显示好友在读页面');
+                    break;
+                default:
+                    if (path.startsWith('/book/')) {
+                        const bookId = path.split('/')[2];
+                        console.log('显示书籍详情:', bookId);
+                    } else if (path.startsWith('/topic/')) {
+                        const topicId = path.split('/')[2];
+                        console.log('显示话题详情:', topicId);
+                    }
+            }
+        }
+        // 修改导航链接点击事件
+        navLinks.forEach(link => {
+            const anchor = link.querySelector('a');
+            if (anchor) {
+                anchor.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleRoute(anchor.getAttribute('href'));
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            }
+        });
+
+        // 修改书籍和话题卡片点击事件
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('a[href^="/book/"]') || e.target.closest('a[href^="/topic/"]')) {
+                e.preventDefault();
+                handleRoute(e.target.closest('a').getAttribute('href'));
+            }
+        });
+        // Initialize
+        renderTopics();
+        renderBooks();
+
+        // Event Listeners
+        loginBtn.addEventListener('click', () => {
+            loginModal.classList.add('active');
+        });
+
+        closeLogin.addEventListener('click', () => {
+            loginModal.classList.remove('active');
+        });
+
+        submitLogin.addEventListener('click', () => {
+            loginModal.classList.remove('active');
+            loginBtn.style.display = 'none';
+            userProfile.style.display = 'flex';
+        });
+
+        matchTrigger.addEventListener('click', () => {
+            matchModal.classList.add('active');
+        });
+
+        closeMatch.addEventListener('click', () => {
+            matchModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.remove('active');
+            }
+            if (e.target === matchModal) {
+                matchModal.classList.remove('active');
+            }
+        });
+
+        // Nav link active state
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+
+        // Sidebar collapse
+        sidebarTitles.forEach(title => {
+            title.addEventListener('click', () => {
+                title.classList.toggle('collapsed');
+                // In a real app, you would toggle the content visibility here
+            });
+        });
+
+        // Tag filtering
+        tags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                tags.forEach(t => t.classList.remove('active'));
+                tag.classList.add('active');
+                // In a real app, you would filter content here
+            });
+        });
+    </script>
+</body>
+
+</html>
