@@ -39,7 +39,6 @@ func main() {
 	_ = initRedis()
 
 	models.SetDB(db)
-	// 在 main 函数中添加
 	db.AutoMigrate(&models.Book{}, &models.User{}, &models.UserBookInteraction{})
 
 	r := SetupRouter(db)

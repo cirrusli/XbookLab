@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书籍详情 - XbookLab</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 复用相同的header -->
+    <header id="shared-header"></header>
+
+    <main class="detail-container">
+        <div class="book-detail">
+            <img src="" alt="书籍封面" class="detail-cover" id="detail-cover">
+            <div class="detail-info">
+                <h1 id="book-title"></h1>
+                <p class="author" id="book-author"></p>
+                <p class="rating" id="book-rating"></p>
+                <p class="desc" id="book-desc"></p>
+            </div>
+        </div>
+    </main>
+
+    <script src="shared.js"></script>
+    <script>
+        // 从URL获取书籍ID并加载数据
+        const bookId = new URLSearchParams(window.location.search).get('id');
+        const book = books.find(b => b.id == bookId);
+        
+        if(book) {
+            document.getElementById('detail-cover').src = book.cover;
+            document.getElementById('book-title').textContent = book.title;
+            document.getElementById('book-author').textContent = `作者: ${book.author}`;
+            document.getElementById('book-rating').textContent = `评分: ${book.rating}`;
+            document.getElementById('book-desc').textContent = book.desc;
+        }
+    </script>
+</body>
+</html>

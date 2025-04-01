@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热榜 - XbookLab</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #42b983;
+            --primary-light: #f0faf3;
+            --bg-color: #f5f5f1;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #e1e1e1;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .content {
+            flex: 1;
+        }
+
+        .hot-list {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .hot-item {
+            display: flex;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .hot-item:hover {
+            background: var(--primary-light);
+        }
+
+        .hot-rank {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            width: 40px;
+            text-align: center;
+            margin-right: 16px;
+        }
+
+        .hot-content {
+            flex: 1;
+        }
+
+        .hot-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .hot-meta {
+            display: flex;
+            gap: 12px;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .hot-meta span {
+            display: flex;
+            align-items: center;
+        }
+
+        .hot-meta span::before {
+            content: '·';
+            margin-right: 4px;
+        }
+
+        .hot-meta span:first-child::before {
+            content: '';
+            margin-right: 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header id="shared-header"></header>
+
+    <main class="main-container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">榜单分类</h3>
+                <div class="tag-cloud">
+                    <span class="tag active" data-period="today">今日</span>
+                    <span class="tag" data-period="week">本周</span>
+                    <span class="tag" data-period="month">本月</span>
+                </div>
+            </div>
+        </aside>
+
+        <div class="content">
+            <section class="content-section">
+                <h2 class="section-title">今日热榜</h2>
+                <div class="hot-list" id="hot-list">
+                    <!-- 热榜条目将通过JS动态生成 -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="shared.js"></script>
+    <script>
+        // 丰富的热榜数据
+        const hotItems = {
+            today: [
+                {
+                    rank: 1,
+                    title: "如何培养深度阅读的习惯？",
+                    author: "阅读达人",
+                    views: 2450,
+                    likes: 189,
+                    comments: 56,
+                    category: "阅读方法"
+                },
+                {
+                    rank: 2,
+                    title: "2023年最值得阅读的10本科技书籍",
+                    author: "科技观察者",
+                    views: 1890,
+                    likes: 143,
+                    comments: 42,
+                    category: "科技"
+                },
+                {
+                    rank: 3,
+                    title: "心理学入门：从这5本书开始",
+                    author: "心理学者",
+                    views: 1672,
+                    likes: 121,
+                    comments: 38,
+                    category: "心理学"
+                },
+                {
+                    rank: 4,
+                    title: "商业思维训练：实战案例分析",
+                    author: "商业顾问",
+                    views: 1543,
+                    likes: 98,
+                    comments: 29,
+                    category: "商业"
+                },
+                {
+                    rank: 5,
+                    title: "艺术鉴赏：如何看懂一幅画",
+                    author: "艺术评论家",
+                    views: 1321,
+                    likes: 87,
+                    comments: 24,
+                    category: "艺术"
+                }
+            ],
+            week: [
+                // 本周数据...
+            ],
+            month: [
+                // 本月数据...
+            ]
+        };
+
+        // 分类标签点击事件
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                // 移除所有标签的active类
+                document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+                // 给当前点击的标签添加active类
+                this.classList.add('active');
+                
+                // 获取分类
+                const period = this.dataset.period;
+                renderHotList(period);
+            });
+        });
+
+        // 渲染热榜列表
+        function renderHotList(period = 'today') {
+            const container = document.getElementById('hot-list');
+            container.innerHTML = '';
+            
+            const items = hotItems[period] || [];
+            
+            items.forEach(item => {
+                const element = document.createElement('div');
+                element.className = 'hot-item';
+                element.innerHTML = `
+                    <div class="hot-rank">${item.rank}</div>
+                    <div class="hot-content">
+                        <h3 class="hot-title">${item.title}</h3>
+                        <div class="hot-meta">
+                            <span>${item.author}</span>
+                            <span>${item.views}浏览</span>
+                            <span>${item.likes}赞</span>
+                            <span>${item.comments}评论</span>
+                            <span>${item.category}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(element);
+            });
+        }
+
+        // 初始化显示今日热榜
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHotList('today');
+        });
+    </script>
+</body>
+</html>
+
+<style>
+    /* 新增侧边栏样式 */
+    .sidebar-section {
+        margin-bottom: 24px;
+    }
+
+    .sidebar-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tag-cloud {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tag {
+        display: block;
+        padding: 8px 12px;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 14px;
+        color: var(--text-light);
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+    }
+
+    .tag:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .tag.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* 新增分类图标 */
+    .sidebar-title::after {
+        content: '▼';
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-title.collapsed::after {
+        transform: rotate(-90deg);
+    }
+</style>
+
+<script>
+    // 添加侧边栏标题点击事件
+    document.querySelectorAll('.sidebar-title').forEach(title => {
+        title.addEventListener('click', function() {
+            this.classList.toggle('collapsed');
+            const tagCloud = this.nextElementSibling;
+            tagCloud.style.display = this.classList.contains('collapsed') ? 'none' : 'block';
+        });
+    });
+
+    // ... 其他脚本保持不变 ...
+</script>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>话题详情 - XbookLab</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header id="shared-header"></header>
+
+    <main class="detail-container">
+        <article class="topic-detail">
+            <h1 id="topic-title"></h1>
+            <div class="meta">
+                <span id="topic-category"></span>
+                <span id="topic-likes"></span>
+            </div>
+            <div class="content" id="topic-content"></div>
+        </article>
+    </main>
+
+    <script src="shared.js"></script>
+    <script>
+        const topicId = new URLSearchParams(window.location.search).get('id');
+        const topic = topics.find(t => t.id == topicId);
+        
+        if(topic) {
+            document.getElementById('topic-title').textContent = topic.title;
+            document.getElementById('topic-category').textContent = topic.category;
+            document.getElementById('topic-likes').textContent = `${topic.likes} 赞`;
+            document.getElementById('topic-content').textContent = topic.excerpt;
+        }
+    </script>
+</body>
+</html>

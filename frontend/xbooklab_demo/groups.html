@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兴趣小组 - XbookLab</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #42b983;
+            --primary-light: #f0faf3;
+            --bg-color: #f5f5f1;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #e1e1e1;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .groups-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(66, 185, 131, 0.15);
+        }
+
+        .group-cover {
+            height: 160px;
+            width: 100%;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .group-info {
+            padding: 16px;
+        }
+
+        .group-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .group-desc {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .group-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .join-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 13px;
+        }
+
+        .join-btn:hover {
+            background-color: #3aa876;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .groups-container {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header id="shared-header"></header>
+
+    <main class="main-container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">小组分类</h3>
+                <div class="tag-cloud">
+                    <span class="tag active" data-category="all">全部</span>
+                    <span class="tag" data-category="literature">文学</span>
+                    <span class="tag" data-category="technology">科技</span>
+                    <span class="tag" data-category="history">历史</span>
+                    <span class="tag" data-category="psychology">心理学</span>
+                    <span class="tag" data-category="art">艺术</span>
+                    <span class="tag" data-category="business">商业</span>
+                    <span class="tag" data-category="philosophy">哲学</span>
+                </div>
+            </div>
+        </aside>
+
+        <div class="content">
+            <section class="content-section">
+                <h2 class="section-title">热门小组</h2>
+                <div class="groups-container" id="groups-container">
+                    <!-- 小组卡片将通过JS动态生成 -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="shared.js"></script>
+    <script>
+        // 丰富的小组数据
+        const groups = [
+            {
+                id: 1,
+                title: "深度阅读俱乐部",
+                cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c",
+                members: 1245,
+                topics: 89,
+                category: "阅读",
+                desc: "专注深度阅读与思考的交流平台"
+            },
+            {
+                id: 2,
+                title: "科技前沿讨论组",
+                cover: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485",
+                members: 892,
+                topics: 156,
+                category: "科技",
+                desc: "探讨最新科技趋势与创新技术"
+            },
+            {
+                id: 3,
+                title: "古典文学研究会",
+                cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c",
+                members: 673,
+                topics: 234,
+                category: "文学",
+                desc: "研究古典文学作品的学术小组"
+            },
+            {
+                id: 4,
+                title: "心理学读书会",
+                cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c",
+                members: 1102,
+                topics: 187,
+                category: "心理学",
+                desc: "心理学爱好者交流与学习平台"
+            },
+            {
+                id: 5,
+                title: "历史探索者",
+                cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c",
+                members: 756,
+                topics: 143,
+                category: "历史",
+                desc: "探索历史真相，分享历史见解"
+            },
+            {
+                id: 6,
+                title: "商业思维训练营",
+                cover: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
+                members: 983,
+                topics: 211,
+                category: "商业",
+                desc: "提升商业思维与决策能力"
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('groups-container');
+
+            groups.forEach(group => {
+                const card = document.createElement('div');
+                card.className = 'group-card';
+                card.innerHTML = `
+                    <img src="${group.cover}" alt="${group.title}" class="group-cover" 
+                         onerror="this.src='https://via.placeholder.com/400x160/42b983/ffffff?text=${encodeURIComponent(group.title)}'">
+                    <div class="group-info">
+                        <h3 class="group-title">${group.title}</h3>
+                        <p class="group-desc">${group.desc}</p>
+                        <div class="group-meta">
+                            <span>${group.members}成员 · ${group.topics}话题</span>
+                            <button class="join-btn">加入</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        // 分类标签点击事件
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('click', function () {
+                // 移除所有标签的active类
+                document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+                // 给当前点击的标签添加active类
+                this.classList.add('active');
+
+                // 获取分类
+                const category = this.dataset.category;
+                filterGroups(category);
+            });
+        });
+
+        // 分类筛选函数
+        function filterGroups(category) {
+            const container = document.getElementById('groups-container');
+            container.innerHTML = '';
+
+            const filteredGroups = category === 'all'
+                ? groups
+                : groups.filter(group => group.category === category);
+
+            filteredGroups.forEach(group => {
+                const card = document.createElement('div');
+                card.className = 'group-card';
+                card.innerHTML = `
+                    <img src="${group.cover}" alt="${group.title}" class="group-cover" 
+                         onerror="this.src='https://via.placeholder.com/400x160/42b983/ffffff?text=${encodeURIComponent(group.title)}'">
+                    <div class="group-info">
+                        <h3 class="group-title">${group.title}</h3>
+                        <p class="group-desc">${group.desc}</p>
+                        <div class="group-meta">
+                            <span>${group.members}成员 · ${group.topics}话题</span>
+                            <button class="join-btn">加入</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 初始化显示所有小组
+        document.addEventListener('DOMContentLoaded', () => {
+            filterGroups('all');
+        });
+    </script>
+</body>
+
+</html>
+
+<style>
+    :root {
+        --primary-color: #42b983;
+        --primary-light: #f0faf3;
+        --bg-color: #f5f5f1;
+        --text-dark: #333;
+        --text-light: #666;
+        --border-color: #e1e1e1;
+        --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .groups-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+    }
+
+    .group-card {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .group-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(66, 185, 131, 0.15);
+    }
+
+    .group-cover {
+        height: 160px;
+        width: 100%;
+        object-fit: cover;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .group-info {
+        padding: 16px;
+    }
+
+    .group-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-dark);
+    }
+
+    .group-desc {
+        color: var(--text-light);
+        font-size: 14px;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .group-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--text-light);
+        font-size: 13px;
+    }
+
+    .join-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 13px;
+    }
+
+    .join-btn:hover {
+        background-color: #3aa876;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .groups-container {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        }
+
+        .main-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* 标签样式 */
+    .tag {
+        display: inline-block;
+        padding: 6px 12px;
+        margin: 4px;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        font-size: 13px;
+        color: var(--text-light);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .tag:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .tag.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* 侧边栏标题可点击样式 */
+    .sidebar-title {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        padding-right: 20px;
+    }
+
+    .sidebar-title::after {
+        content: '▼';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-title.collapsed::after {
+        transform: translateY(-50%) rotate(-90deg);
+    }
+
+    /* 新增内容区域样式 */
+    .content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .content-section {
+        margin-bottom: 40px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 20px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* 修改原有样式 */
+    .groups-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+    }
+</style>
+</div>
+</div>
+
+<script>
+    // 添加侧边栏标题点击事件
+    document.querySelectorAll('.sidebar-title').forEach(title => {
+        title.addEventListener('click', () => {
+            title.classList.toggle('collapsed');
+            const tagCloud = title.nextElementSibling;
+            tagCloud.style.display = title.classList.contains('collapsed') ? 'none' : 'block';
+        });
+    });
+
+    // 标签点击事件保持不变...
+</script>
