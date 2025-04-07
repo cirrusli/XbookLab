@@ -86,7 +86,27 @@
 
 <body>
     <!-- 使用共享header -->
-    <header id="shared-header"></header>
+    <header>
+    <div class="nav-container">
+        <ul class="nav-links">
+            <li><a href="/">推荐</a></li>
+            <li><a href="/groups">兴趣小组</a></li>
+            <li><a href="/hot">热榜</a></li>
+            <li class="active"><a href="/friends">好友在读</a></li>
+            <li><a href="#" id="match-trigger">书友匹配</a></li>
+        </ul>
+        <div class="user-section">
+            <button class="login-btn" id="login-btn">登录</button>
+            <div class="user-profile" id="user-profile" style="display: none;">
+                <a href="/user" class="profile-link">
+                    <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="User Avatar" class="user-avatar">
+                    <span class="username">书友小李</span>
+                </a>
+                <button class="logout-btn" id="logout-btn">退出</button>
+            </div>
+        </div>
+    </div>
+</header>
 
     <main class="main-container">
         <aside class="sidebar">
@@ -161,17 +181,6 @@
 </html>
 
 <style>
-    :root {
-        --primary-color: #42b983;
-        --primary-light: rgba(66, 185, 131, 0.1);
-        --bg-color: #f8f9fa;
-        --text-dark: #2c3e50;
-        --text-light: #7f8c8d;
-        --border-color: #e0e0e0;
-        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
     body {
         background-color: var(--bg-color);
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;

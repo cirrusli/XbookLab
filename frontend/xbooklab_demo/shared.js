@@ -151,10 +151,10 @@ document.addEventListener('DOMContentLoaded', function () {
         header.innerHTML = `
             <div class="nav-container">
                 <ul class="nav-links">
-                    <li><a href="xbooklab.html">推荐</a></li>
-                    <li><a href="groups.html">兴趣小组</a></li>
-                    <li><a href="hot.html">热榜</a></li>
-                    <li class="active"><a href="friends.html">好友在读</a></li>
+                    <li><a href="./xbooklab.html">推荐</a></li>
+                    <li><a href="./groups.html">兴趣小组</a></li>
+                    <li><a href="./hot.html">热榜</a></li>
+                    <li class="active"><a href="./friends.html">好友在读</a></li>
                     <li><a href="#" id="match-trigger">书友匹配</a></li>
                 </ul>
                 <div class="user-section">
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
 
         // 高亮当前页面导航项
-        const currentPage = window.location.pathname.split('/').pop() || 'xbooklab.html';
+        const currentPage = window.location.pathname.split('/').pop() || './xbooklab.html';
         document.querySelectorAll('.nav-links li').forEach(li => {
             const link = li.querySelector('a');
             if (link && link.getAttribute('href') === currentPage) {
@@ -248,13 +248,37 @@ const currentUser = {
 };
 
 // 路由处理函数
-// function handleRoute(path) {
-//     switch (path) {
-//         case '/user':
-//             window.location.href = 'user.html';
-//             break;
-//     }
-// }
+function handleRoute(path) {
+    switch (path) {
+        case '/user':
+            window.location.href = 'user.html';
+            break;
+        case '/':
+        case '/xbooklab.html':
+            window.location.href = 'xbooklab.html';
+            break;
+        case '/groups':
+            window.location.href = 'groups.html';
+            break;
+        case '/hot':
+            window.location.href = 'hot.html';
+            break;
+        case '/friends':
+            window.location.href = 'friends.html';
+            break;
+    }
+}
+
+// 初始化路由事件
+function initRouter() {
+    document.querySelectorAll('a[href^="/"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const path = new URL(link.href).pathname;
+            handleRoute(path);
+        });
+    });
+}
 
 // 初始化用户主页
 function initUserProfile() {

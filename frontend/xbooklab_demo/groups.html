@@ -110,7 +110,27 @@
 </head>
 
 <body>
-    <header id="shared-header"></header>
+    <header>
+    <div class="nav-container">
+        <ul class="nav-links">
+            <li><a href="/">推荐</a></li>
+            <li class="active"><a href="/groups">兴趣小组</a></li>
+            <li><a href="/hot">热榜</a></li>
+            <li><a href="/friends">好友在读</a></li>
+            <li><a href="#" id="match-trigger">书友匹配</a></li>
+        </ul>
+        <div class="user-section">
+            <button class="login-btn" id="login-btn">登录</button>
+            <div class="user-profile" id="user-profile" style="display: none;">
+                <a href="/user" class="profile-link">
+                    <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="User Avatar" class="user-avatar">
+                    <span class="username">书友小李</span>
+                </a>
+                <button class="logout-btn" id="logout-btn">退出</button>
+            </div>
+        </div>
+    </div>
+</header>
 
     <main class="main-container">
         <aside class="sidebar">
