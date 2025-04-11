@@ -20,11 +20,11 @@
 
 ```bash
 # 后端
-cd /Users/cirrusli/GolandProjects/canigraduate
+cd /Users/cirrusli/GolandProjects/canigraduate/backend
 go run main.go
 
 # 前端
-cd frontend
+cd /Users/cirrusli/GolandProjects/canigraduate/frontend
 npm install
 npm run dev
 ```
