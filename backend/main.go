@@ -3,8 +3,11 @@ package main
 import (
 	"log"
 
-	"canigraduate/models"
+	"xbooklab/handlers"
+	"xbooklab/middleware"
+	"xbooklab/models"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -13,11 +16,11 @@ import (
 // 初始化MySQL连接
 func initMySQL() *gorm.DB {
 	// 先连接无库名实例创建数据库
-	createDB, _ := gorm.Open(mysql.Open("root:password@tcp(localhost:3306)/?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
+	createDB, _ := gorm.Open(mysql.Open("root:lzq@tcp(localhost:3306)/?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
 	createDB.Exec("CREATE DATABASE IF NOT EXISTS x_book_lab")
 
 	// 连接目标数据库
-	dsn := "root:password@tcp(localhost:3306)/x_book_lab?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:lzq@tcp(localhost:3306)/x_book_lab?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("MySQL连接失败:", err)
@@ -36,13 +39,73 @@ func initRedis() *redis.Client {
 
 func main() {
 	db := initMySQL()
-	_ = initRedis()
-
 	models.SetDB(db)
-	db.AutoMigrate(&models.Book{}, &models.User{}, &models.UserBookInteraction{})
+	db.AutoMigrate(&models.Book{}, &models.User{}, &models.UserInteraction{}, &models.Topic{}, &models.Recommendation{})
 
-	r := SetupRouter(db)
+	// 初始化Redis客户端
+	rdb := initRedis()
+
+	r := InitRouter(db, rdb)
 	if err := r.Run(":8000"); err != nil {
 		log.Fatal("服务启动失败:", err)
 	}
+}
+func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
+	r := gin.Default()
+	r.Use(gin.Logger(), gin.Recovery())
+
+	// 认证相关路由
+	auth := r.Group("/api/auth")
+	{
+		auth.POST("/register", handlers.Register)
+		auth.POST("/login", handlers.Login)
+		auth.POST("/logout", handlers.Logout)
+		auth.PUT("/change-password", middleware.AuthMiddleware(), handlers.ChangePassword)
+	}
+
+	// 用户相关路由 (需要认证)
+	user := r.Group("/api/user")
+	user.Use(middleware.AuthMiddleware())
+	{
+		user.GET("/profile", handlers.GetUserProfile)
+		user.PUT("/profile", handlers.UpdateUserProfile)
+		user.POST("/avatar", handlers.UploadAvatar)
+		user.POST("/follow", handlers.FollowUser)
+		user.DELETE("/follow/:id", handlers.UnfollowUser)
+		user.GET("/following", handlers.GetFollowing)
+		user.GET("/followers", handlers.GetFollowers)
+	}
+
+	// 书籍相关路由
+	books := r.Group("/api/books")
+	{
+		books.GET("/", handlers.GetBooks)
+		books.POST("/", handlers.CreateBook)
+		books.GET("/:id", handlers.GetBook)
+		books.PUT("/:id", handlers.UpdateBook)
+		books.DELETE("/:id", handlers.DeleteBook)
+	}
+
+	// 推荐书籍路由
+	r.GET("/api/recommend", handlers.GetRecommendedBooks)
+
+	// 用户行为路由
+	interaction := r.Group("/api/interaction")
+	interaction.Use(middleware.AuthMiddleware())
+	{
+		interaction.POST("/view/:bookId", handlers.RecordBookView)
+		interaction.POST("/rate/:bookId", handlers.RecordBookRating)
+	}
+
+	// 话题相关路由
+	topics := r.Group("/api/topics")
+	{
+		topics.GET("/", handlers.GetTopics)
+		topics.POST("/", handlers.CreateTopic)
+		topics.GET("/:id", handlers.GetTopic)
+		topics.PUT("/:id", handlers.UpdateTopic)
+		topics.DELETE("/:id", handlers.DeleteTopic)
+	}
+
+	return r
 }

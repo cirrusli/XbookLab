@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"canigraduate/models"
 	"net/http"
+	"xbooklab/models"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -92,6 +92,54 @@ func UpdateUserProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "用户信息更新成功"})
 }
 
+// FollowUser 关注用户
+func FollowUser(c *gin.Context) {
+	userID := c.MustGet("userID").(uint)
+	followID := c.Param("id")
+
+	err := models.FollowUser(userID, followID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "关注操作失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "关注成功"})
+}
+
+// UnfollowUser 取消关注
+func UnfollowUser(c *gin.Context) {
+	userID := c.MustGet("userID").(uint)
+	followID := c.Param("id")
+
+	err := models.UnfollowUser(userID, followID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "取消关注失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "取消关注成功"})
+}
+
+// GetFollowing 获取关注列表
+func GetFollowing(c *gin.Context) {
+	userID := c.MustGet("userID").(uint)
+	following, err := models.GetFollowing(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取关注列表失败"})
+		return
+	}
+	c.JSON(http.StatusOK, following)
+}
+
+// GetFollowers 获取粉丝列表
+func GetFollowers(c *gin.Context) {
+	userID := c.MustGet("userID").(uint)
+	followers, err := models.GetFollowers(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取粉丝列表失败"})
+		return
+	}
+	c.JSON(http.StatusOK, followers)
+}
+
 func UploadAvatar(c *gin.Context) {
 	userID := c.MustGet("userID").(uint)
 
@@ -103,7 +151,7 @@ func UploadAvatar(c *gin.Context) {
 
 	// 这里应该实现文件保存逻辑，返回文件路径
 	avatarPath := "/uploads/" + file.Filename
-	if err := c.SaveUploadedFile(file, "."+avatarPath); err != nil {
+	if err := c.SaveUploadedFile(file, "./uploads/"+file.Filename); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存头像文件失败"})
 		return
 	}

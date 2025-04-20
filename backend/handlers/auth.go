@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"canigraduate/models"
+	"xbooklab/models"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -71,7 +71,7 @@ func Logout(c *gin.Context) {
 
 func ChangePassword(c *gin.Context) {
 	userID := c.MustGet("userID").(uint)
-	
+
 	var req ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

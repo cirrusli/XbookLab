@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"canigraduate/models"
 	"net/http"
 	"strconv"
+	"xbooklab/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +18,11 @@ func CreateBook(c *gin.Context) {
 	var book models.Book
 	if err := c.ShouldBindJSON(&book); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(book.CategoryTags) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
 		return
 	}
 	models.DB.Create(&book)
@@ -45,6 +50,11 @@ func UpdateBook(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if len(book.CategoryTags) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
+		return
+	}
 	models.DB.Save(&book)
 	c.JSON(http.StatusOK, book)
 }
@@ -64,7 +74,7 @@ func GetRecommendedBooks(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	categoryID := c.Query("categoryId")
-	
+
 	// 从上下文中获取用户ID
 	userID, _ := c.Get("userID")
 	var uid uint

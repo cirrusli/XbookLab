@@ -1,0 +1,311 @@
+syntax = "proto3";
+
+package xbooklab;
+option go_package = "./;xbooklab";
+
+service XbookLab {
+  // Register
+  rpc Register (RegisterReq) returns (RegisterResp);
+  rpc GetUserProfile (GetUserProfileReq) returns (GetUserProfileResp);
+  rpc UpdateUserProfile (UpdateUserProfileReq) returns (UpdateUserProfileResp);
+  rpc UploadAvatar (UploadAvatarReq) returns (UploadAvatarResp);
+  
+  // Auth
+  rpc Login (LoginReq) returns (LoginResp);
+  rpc Logout (LogoutReq) returns (LogoutResp);
+  rpc ChangePassword (ChangePasswordReq) returns (ChangePasswordResp);
+  
+  // Books
+  rpc GetBooks (GetBooksReq) returns (GetBooksResp);
+  rpc CreateBook (CreateBookReq) returns (CreateBookResp);
+  rpc GetBook (GetBookReq) returns (GetBookResp);
+  rpc UpdateBook (UpdateBookReq) returns (UpdateBookResp);
+  rpc DeleteBook (DeleteBookReq) returns (DeleteBookResp);
+  
+  // Recommend
+  rpc GetRecommendedBooks (GetRecommendedBooksReq) returns (GetRecommendedBooksResp);
+  
+  // Interaction
+  rpc RecordBookView (RecordBookViewReq) returns (RecordBookViewResp);
+  rpc RecordBookRating (RecordBookRatingReq) returns (RecordBookRatingResp);
+  
+  // Topics
+  rpc GetTopics (GetTopicsReq) returns (GetTopicsResp);
+  rpc CreateTopic (CreateTopicReq) returns (CreateTopicResp);
+  rpc GetTopic (GetTopicReq) returns (GetTopicResp);
+  rpc UpdateTopic (UpdateTopicReq) returns (UpdateTopicResp);
+  rpc DeleteTopic (DeleteTopicReq) returns (DeleteTopicResp);
+  
+  // Follow
+  rpc FollowUser (FollowUserReq) returns (FollowResp);
+  rpc UnfollowUser (UnfollowUserReq) returns (FollowResp);
+  rpc GetFollowingList (GetFollowingReq) returns (FollowListResp);
+  rpc GetFollowersList (GetFollowersReq) returns (FollowListResp);
+}
+
+// Follow Messages
+message FollowUserReq {
+  uint32 user_id = 1;
+  uint32 follow_id = 2;
+}
+
+message UnfollowUserReq {
+  uint32 user_id = 1;
+  uint32 follow_id = 2;
+}
+
+message GetFollowingReq {
+  uint32 user_id = 1;
+  uint32 page = 2;
+  uint32 page_size = 3;
+}
+
+message GetFollowersReq {
+  uint32 user_id = 1;
+  uint32 page = 2;
+  uint32 page_size = 3;
+}
+
+message FollowListResp {
+  repeated GetUserProfileResp users = 1;
+  uint32 total = 2;
+}
+
+message FollowResp {
+  string message = 1;
+}
+
+message UserInfo {
+  uint32 id = 1;
+  string username = 2;
+  string nickname = 3;
+  string avatar = 4;
+  string bio = 5;
+}
+
+// Register Req
+message RegisterReq {
+  string username = 1;
+  string password = 2;
+  string nickname = 3;
+  string avatar = 4;
+  string bio = 5;
+  string email = 6;
+}
+
+// Register Resp
+message RegisterResp {
+  string message = 1;
+}
+
+// GetUserProfile Req
+message GetUserProfileReq {
+  uint32 user_id = 1;
+}
+
+// GetUserProfile Resp
+message GetUserProfileResp {
+  uint32 id = 1;
+  string username = 2;
+  string nickname = 3;
+  string avatar = 4;
+  string bio = 5;
+}
+
+// UpdateUserProfile Req
+message UpdateUserProfileReq {
+  uint32 user_id = 1;
+  string nickname = 2;
+  string avatar = 3;
+  string bio = 4;
+}
+
+// UpdateUserProfile Resp
+message UpdateUserProfileResp {
+  string message = 1;
+}
+
+// UploadAvatar Req
+message UploadAvatarReq {
+  uint32 user_id = 1;
+  bytes avatar = 2;
+}
+
+// UploadAvatar Resp
+message UploadAvatarResp {
+  string avatar_path = 1;
+  string message = 2;
+}
+
+// Auth Messages
+message LoginReq {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResp {
+  string token = 1;
+  string message = 2;
+}
+
+message LogoutReq {
+  string token = 1;
+}
+
+message LogoutResp {
+  string message = 1;
+}
+
+message ChangePasswordReq {
+  uint32 user_id = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
+
+message ChangePasswordResp {
+  string message = 1;
+}
+
+// Book Messages
+message GetBooksReq {
+  uint32 page = 1;
+  uint32 page_size = 2;
+}
+
+message GetBooksResp {
+  repeated Book books = 1;
+  uint32 total = 2;
+}
+
+message Book {
+  uint32 id = 1;
+  string title = 2;
+  string author = 3;
+  string cover = 4;
+  string description = 5;
+}
+
+message CreateBookReq {
+  string title = 1;
+  string author = 2;
+  string cover = 3;
+  string description = 4;
+}
+
+message CreateBookResp {
+  uint32 id = 1;
+  string message = 2;
+}
+
+message GetBookReq {
+  uint32 id = 1;
+}
+
+message GetBookResp {
+  Book book = 1;
+}
+
+message UpdateBookReq {
+  uint32 id = 1;
+  string title = 2;
+  string author = 3;
+  string cover = 4;
+  string description = 5;
+}
+
+message UpdateBookResp {
+  string message = 1;
+}
+
+message DeleteBookReq {
+  uint32 id = 1;
+}
+
+message DeleteBookResp {
+  string message = 1;
+}
+
+// Recommend Messages
+message GetRecommendedBooksReq {
+  uint32 user_id = 1;
+  uint32 limit = 2;
+}
+
+message GetRecommendedBooksResp {
+  repeated Book books = 1;
+}
+
+// Interaction Messages
+message RecordBookViewReq {
+  uint32 user_id = 1;
+  uint32 book_id = 2;
+}
+
+message RecordBookViewResp {
+  string message = 1;
+}
+
+message RecordBookRatingReq {
+  uint32 user_id = 1;
+  uint32 book_id = 2;
+  uint32 rating = 3;
+}
+
+message RecordBookRatingResp {
+  string message = 1;
+}
+
+// Topic Messages
+message GetTopicsReq {
+  uint32 page = 1;
+  uint32 page_size = 2;
+}
+
+message GetTopicsResp {
+  repeated Topic topics = 1;
+  uint32 total = 2;
+}
+
+message Topic {
+  uint32 id = 1;
+  string title = 2;
+  string content = 3;
+  uint32 user_id = 4;
+}
+
+message CreateTopicReq {
+  string title = 1;
+  string content = 2;
+  uint32 user_id = 3;
+}
+
+message CreateTopicResp {
+  uint32 id = 1;
+  string message = 2;
+}
+
+message GetTopicReq {
+  uint32 id = 1;
+}
+
+message GetTopicResp {
+  Topic topic = 1;
+}
+
+message UpdateTopicReq {
+  uint32 id = 1;
+  string title = 2;
+  string content = 3;
+}
+
+message UpdateTopicResp {
+  string message = 1;
+}
+
+message DeleteTopicReq {
+  uint32 id = 1;
+}
+
+message DeleteTopicResp {
+  string message = 1;
+}
