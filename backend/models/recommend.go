@@ -1,7 +1,7 @@
 package models
 
 // 协同过滤推荐算法实现
-func GetUserBasedCFRecommendations(userID uint, limit int, repo UserBehaviorRepository) ([]Book, error) {
+func GetUserBasedCFRecommendations(userID uint, limit int, repo UserInteractionRepo) ([]Book, error) {
 	// 获取所有用户行为数据
 	allBehaviors, err := repo.GetAll()
 	if err != nil {

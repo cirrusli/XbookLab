@@ -9,7 +9,7 @@ import (
 
 func TestGetUserBasedCFRecommendations(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockRepo := NewMockUserBehaviorRepository(ctrl)
+	mockRepo := NewMockUserInteractionRepo(ctrl)
 
 	t.Run("新用户冷启动推荐", func(t *testing.T) {
 		mockRepo.EXPECT().GetAll().Return([]UserInteraction{}, nil)

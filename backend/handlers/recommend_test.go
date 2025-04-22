@@ -20,7 +20,7 @@ func TestRecommend(t *testing.T) {
 	testDB.AutoMigrate(&models.Topic{})
 	t.Run("冷启动用户推荐", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := models.NewMockUserBehaviorRepository(ctrl)
+		mockRepo := models.NewMockUserInteractionRepo(ctrl)
 		mockRepo.EXPECT().GetAll().Return([]models.UserInteraction{}, nil)
 
 		models.MockGetPopularBooks = func(int) []models.Book {
@@ -42,7 +42,7 @@ func TestRecommend(t *testing.T) {
 
 	t.Run("正常用户推荐", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := models.NewMockUserBehaviorRepository(ctrl)
+		mockRepo := models.NewMockUserInteractionRepo(ctrl)
 		mockRepo.EXPECT().GetAll().Return([]models.UserInteraction{{UserID: 1}}, nil)
 
 		w := httptest.NewRecorder()
@@ -55,7 +55,7 @@ func TestRecommend(t *testing.T) {
 
 	t.Run("无效用户ID", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := models.NewMockUserBehaviorRepository(ctrl)
+		mockRepo := models.NewMockUserInteractionRepo(ctrl)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)

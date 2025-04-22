@@ -11,7 +11,7 @@ import (
 // Recommend 基于用户协同过滤的推荐接口，输入用户ID，返回推荐内容
 // 新用户采用热门内容+随机话题的混合推荐策略
 // 优化方向：可缓存用户相似度矩阵，更新周期24小时
-func Recommend(c *gin.Context, repo models.UserBehaviorRepository) {
+func Recommend(c *gin.Context, repo models.UserInteractionRepo) {
 	currentUserID := c.GetUint("user_id")
 	if currentUserID == 0 {
 		c.JSON(400, gin.H{"error": "无效用户ID"})

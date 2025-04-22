@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -10,7 +14,7 @@ type User struct {
 	Avatar              string         `gorm:"size:255"`
 	Bio                 string         `gorm:"type:text"`
 	Email               string         `gorm:"size:100;unique"`
-	CategoryPreferences map[string]int `gorm:"type:json"`
+	CategoryPreferences map[string]int `gorm:"type:json;serializer:json"`
 	Following           []User         `gorm:"many2many:user_follows;joinForeignKey:user_id;joinReferences:follow_id"`
 	Followers           []User         `gorm:"many2many:user_follows;joinForeignKey:follow_id;joinReferences:user_id"`
 }
@@ -30,7 +34,12 @@ func UpdateUser(user *User) error {
 }
 
 func FollowUser(userID uint, followID string) error {
-	return DB.Model(&User{}).Where("id = ?", userID).Association("Following").Append(&User{Model: gorm.Model{ID: userID}})
+	// 检查被关注用户是否存在
+	var followUser User
+	if err := DB.First(&followUser, followID).Error; err != nil {
+		return fmt.Errorf("被关注用户不存在")
+	}
+	return DB.Model(&User{}).Where("id = ?", userID).Association("Following").Append(&User{Model: gorm.Model{ID: followUser.ID}})
 }
 
 func UnfollowUser(userID uint, followID string) error {

@@ -36,7 +36,7 @@ func GetRecommendedBooks(page, pageSize int, categoryID string, userID uint) ([]
 
 	// 如果有登录用户，使用协同过滤推荐
 	if userID > 0 {
-		recommendedBooks, err := GetUserBasedCFRecommendations(userID, pageSize, &GormUserBehaviorRepository{db: DB})
+		recommendedBooks, err := GetUserBasedCFRecommendations(userID, pageSize, &GormUserInteractionRepo{db: DB})
 		if err == nil && len(recommendedBooks) > 0 {
 			books = recommendedBooks
 			total = int64(len(books))

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"xbooklab/models"
 
@@ -32,15 +33,16 @@ func Register(c *gin.Context) {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	user := models.User{
-		Username:     req.Username,
-		PasswordHash: string(hashedPassword),
-		Nickname:     req.Nickname,
-		Avatar:       req.Avatar,
-		Bio:          req.Bio,
-		Email:        req.Email,
+		Username:            req.Username,
+		PasswordHash:        string(hashedPassword),
+		Nickname:            req.Nickname,
+		Avatar:              req.Avatar,
+		Bio:                 req.Bio,
+		Email:               req.Email,
+		CategoryPreferences: make(map[string]int),
 	}
 	if err := models.CreateUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "注册失败"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "注册失败" + err.Error()})
 		return
 	}
 
@@ -96,7 +98,8 @@ func UpdateUserProfile(c *gin.Context) {
 func FollowUser(c *gin.Context) {
 	userID := c.MustGet("userID").(uint)
 	followID := c.Param("id")
-
+	log.Println("followID:", followID) // 打印日志，查看是否正确获取到 followID
+	log.Println("userID:", userID)     // 打印日志，查看是否正确获取到 userID
 	err := models.FollowUser(userID, followID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "关注操作失败"})

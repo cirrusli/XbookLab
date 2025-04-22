@@ -70,7 +70,7 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 		user.GET("/profile", handlers.GetUserProfile)
 		user.PUT("/profile", handlers.UpdateUserProfile)
 		user.POST("/avatar", handlers.UploadAvatar)
-		user.POST("/follow", handlers.FollowUser)
+		user.POST("/follow/:id", handlers.FollowUser)
 		user.DELETE("/follow/:id", handlers.UnfollowUser)
 		user.GET("/following", handlers.GetFollowing)
 		user.GET("/followers", handlers.GetFollowers)

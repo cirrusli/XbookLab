@@ -75,7 +75,7 @@ func GetTopicRecommendations(userID uint, limit int) ([]uint, error) {
 
 // 统一推荐入口
 func GenerateRecommendations(userID uint) Recommendation {
-	bookIDs, _ := GetUserBasedCFRecommendations(userID, 10, &GormUserBehaviorRepository{db: DB})
+	bookIDs, _ := GetUserBasedCFRecommendations(userID, 10, &GormUserInteractionRepo{db: DB})
 	var ids []uint
 	for _, b := range bookIDs {
 		ids = append(ids, b.ID)
@@ -96,23 +96,23 @@ func GenerateRecommendations(userID uint) Recommendation {
 }
 
 // 用户行为仓库接口
-type UserBehaviorRepository interface {
+type UserInteractionRepo interface {
 	GetAll() ([]UserInteraction, error)
 	Create(behavior UserInteraction) error
 }
 
 // GORM用户行为仓库实现
-type GormUserBehaviorRepository struct {
+type GormUserInteractionRepo struct {
 	db *gorm.DB
 }
 
-func (r *GormUserBehaviorRepository) GetAll() ([]UserInteraction, error) {
+func (r *GormUserInteractionRepo) GetAll() ([]UserInteraction, error) {
 	var behaviors []UserInteraction
 	err := r.db.Find(&behaviors).Error
 	return behaviors, err
 }
 
-func (r *GormUserBehaviorRepository) Create(behavior UserInteraction) error {
+func (r *GormUserInteractionRepo) Create(behavior UserInteraction) error {
 	return r.db.Create(&behavior).Error
 }
 
@@ -144,4 +144,4 @@ func (u *UserInteraction) AfterSave(tx *gorm.DB) (err error) {
 	return tx.Create(&behavior).Error
 }
 
-//go:generate mockgen -destination=mock_user_behavior_repository.go -package=models . UserBehaviorRepository
+//go:generate mockgen -destination=mock_user_behavior_repository.go -package=models . UserInteractionRepo
