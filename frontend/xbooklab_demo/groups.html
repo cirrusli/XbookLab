@@ -113,10 +113,10 @@
     <header>
     <div class="nav-container">
         <ul class="nav-links">
-            <li><a href="/">推荐</a></li>
-            <li class="active"><a href="/groups">兴趣小组</a></li>
-            <li><a href="/hot">热榜</a></li>
-            <li><a href="/friends">好友在读</a></li>
+            <li><a href="./xbooklab.html">推荐</a></li>
+            <li class="active"><a href="./groups.html">兴趣小组</a></li>
+            <li><a href="./hot.html">热榜</a></li>
+            <li><a href="./friends.html">好友在读</a></li>
             <li><a href="#" id="match-trigger">书友匹配</a></li>
         </ul>
         <div class="user-section">
@@ -382,6 +382,19 @@
         background-color: #3aa876;
     }
 
+    .main-container {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .content {
+        width: 100%;
+    }
+
     /* 响应式设计 */
     @media (max-width: 768px) {
         .groups-container {
@@ -395,16 +408,17 @@
 
     /* 标签样式 */
     .tag {
-        display: inline-block;
-        padding: 6px 12px;
-        margin: 4px;
+        display: block;
+        padding: 8px 12px;
+        margin: 4px 0;
         background-color: white;
         border: 1px solid var(--border-color);
-        border-radius: 16px;
+        border-radius: 4px;
         font-size: 13px;
         color: var(--text-light);
         cursor: pointer;
         transition: var(--transition);
+        width: 100%;
     }
 
     .tag:hover {
@@ -416,6 +430,19 @@
         background-color: var(--primary-color);
         color: white;
         border-color: var(--primary-color);
+    }
+    
+    .tag-cloud {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: var(--card-shadow);
+        width: 200px;
     }
 
     /* 侧边栏标题可点击样式 */
