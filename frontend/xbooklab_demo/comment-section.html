@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="styles.css">
+<section class="comment-section">
+  <h3 class="section-title">读者讨论</h3>
+  <div class="comment-list" id="comment-list">
+    <!-- 评论将通过JS动态生成 -->
+  </div>
+  <div class="comment-editor">
+    <textarea class="comment-input" placeholder="写下你的思考和评论..."></textarea>
+    <div class="editor-actions">
+      <button class="submit-btn" onclick="submitComment()">发表评论</button>
+    </div>
+  </div>
+</section>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initComments === 'function') {
+      initComments('comment-list');
+    } else {
+      console.error('initComments function not found');
+    }
+  });
+</script>

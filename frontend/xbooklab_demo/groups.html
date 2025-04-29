@@ -391,6 +391,7 @@
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
+        align-items: start;
     }
 
     .content {
@@ -411,42 +412,81 @@
     /* 标签样式 */
     .tag {
         display: block;
-        padding: 8px 12px;
-        margin: 4px 0;
+        padding: 10px 16px;
+        margin: 6px 0;
         background-color: white;
         border: 1px solid var(--border-color);
-        border-radius: 4px;
-        font-size: 13px;
-        color: var(--text-light);
+        border-radius: 8px;
+        font-size: 14px;
+        color: var(--text-dark);
         cursor: pointer;
         transition: var(--transition);
         width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tag::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--primary-light);
+        transition: var(--transition);
     }
 
     .tag:hover {
         border-color: var(--primary-color);
         color: var(--primary-color);
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(66, 185, 131, 0.15);
+    }
+
+    .tag:hover::after {
+        width: 6px;
+        background: var(--primary-color);
     }
 
     .tag.active {
         background-color: var(--primary-color);
         color: white;
         border-color: var(--primary-color);
+        transform: translateX(4px);
     }
-    
+
+    .tag.active::after {
+        width: 6px;
+        background: white;
+    }
+
     .tag-cloud {
         display: flex;
         flex-direction: column;
+        gap: 8px;
     }
     
     .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
         background: white;
         border-radius: 8px;
         padding: 16px;
         box-shadow: var(--card-shadow);
         width: 200px;
+        height: fit-content;
+        flex-shrink: 0;
     }
 
+    .tag-cloud {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        height: auto;
+    }
+    
     /* 侧边栏标题可点击样式 */
     .sidebar-title {
         cursor: pointer;

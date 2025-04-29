@@ -43,7 +43,7 @@ func GetUserBasedCFRecommendations(userID uint, limit int, repo UserInteractionR
 	return getTopNItems(recommendedItems, limit), nil
 }
 
-// 计算用户相似度的函数（示例实现）
+// 计算用户相似度的函数
 func calculateSimilarity(user1, user2 map[uint]float64) float64 {
 	// 这里可以使用余弦相似度等算法，这里只是示例实现
 	similarity := 0.0

@@ -154,7 +154,7 @@ func UploadAvatar(c *gin.Context) {
 
 	// 这里应该实现文件保存逻辑，返回文件路径
 	avatarPath := "/uploads/" + file.Filename
-	if err := c.SaveUploadedFile(file, "./uploads/"+file.Filename); err != nil {
+	if saveErr := c.SaveUploadedFile(file, "./uploads/"+file.Filename); saveErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存头像文件失败"})
 		return
 	}
