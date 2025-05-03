@@ -8,7 +8,8 @@ service XbookLab {
   rpc Register(RegisterReq) returns (RegisterResp);
   rpc GetUserProfile(GetUserProfileReq) returns (GetUserProfileResp);
   rpc UpdateUserProfile(UpdateUserProfileReq) returns (UpdateUserProfileResp);
-  rpc UploadAvatar(UploadAvatarReq) returns (UploadAvatarResp);
+  rpc UploadAvatar(UploadAvatarReq) returns (UploadAvatarResp);// 看看和上一个接口合并？
+  rpc DeleteUser(DeleteUserReq) returns (DeleteUserResp);
 
   // Auth
   rpc Login(LoginReq) returns (LoginResp);
@@ -50,6 +51,9 @@ service XbookLab {
   rpc AddTag(AddTagReq) returns (AddTagResp);
   rpc DeleteTag(DeleteTagReq) returns (DeleteTagResp);
 }
+message DeleteUserReq { uint32 user_id = 1; }
+message DeleteUserResp {}
+
 message GetUserListReq {
   uint32 page = 1;
   uint32 page_size = 2;
