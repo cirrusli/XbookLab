@@ -9,14 +9,14 @@ import (
 // Topic 话题模型
 type Topic struct {
 	gorm.Model
-	Title        string   `gorm:"size:255;not null"`
-	Content      string   `gorm:"type:text;not null"`
-	AuthorID     uint     `gorm:"not null"`
-	ViewCount    uint     `gorm:"default:0"`
-	CategoryTags []string `gorm:"type:json"`                     // 分类标签
-	HeatScore    float64  `gorm:"type:decimal(4,1);default:0.0"` // 热度评分（根据浏览、回复等计算）
-	ReplyCount   uint     `gorm:"default:0"`
-	Status       string   `gorm:"size:20;default:'active'"`
+	Title      string  `gorm:"size:255;not null"`
+	Content    string  `gorm:"type:text;not null"`
+	AuthorID   uint    `gorm:"not null"`
+	ViewCount  uint    `gorm:"default:0"`
+	Tag        string  `gorm:"size:255;not null"`
+	HeatScore  float64 `gorm:"type:decimal(4,1);default:0.0"` // 热度评分（根据浏览、回复等计算）
+	ReplyCount uint    `gorm:"default:0"`
+	Status     string  `gorm:"size:20;default:'active'"`
 }
 
 // GetRandomTopics 获取随机话题

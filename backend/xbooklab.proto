@@ -4,45 +4,86 @@ package xbooklab;
 option go_package = "./;xbooklab";
 
 service XbookLab {
-  // Register
-  rpc Register (RegisterReq) returns (RegisterResp);
-  rpc GetUserProfile (GetUserProfileReq) returns (GetUserProfileResp);
-  rpc UpdateUserProfile (UpdateUserProfileReq) returns (UpdateUserProfileResp);
-  rpc UploadAvatar (UploadAvatarReq) returns (UploadAvatarResp);
-  
+  // User
+  rpc Register(RegisterReq) returns (RegisterResp);
+  rpc GetUserProfile(GetUserProfileReq) returns (GetUserProfileResp);
+  rpc UpdateUserProfile(UpdateUserProfileReq) returns (UpdateUserProfileResp);
+  rpc UploadAvatar(UploadAvatarReq) returns (UploadAvatarResp);
+
   // Auth
-  rpc Login (LoginReq) returns (LoginResp);
-  rpc Logout (LogoutReq) returns (LogoutResp);
-  rpc ChangePassword (ChangePasswordReq) returns (ChangePasswordResp);
-  
-  // Books
-  rpc GetBooks (GetBooksReq) returns (GetBooksResp);
-  rpc CreateBook (CreateBookReq) returns (CreateBookResp);
-  rpc GetBook (GetBookReq) returns (GetBookResp);
-  rpc UpdateBook (UpdateBookReq) returns (UpdateBookResp);
-  rpc DeleteBook (DeleteBookReq) returns (DeleteBookResp);
-  
+  rpc Login(LoginReq) returns (LoginResp);
+  rpc Logout(LogoutReq) returns (LogoutResp);
+  rpc ChangePassword(ChangePasswordReq) returns (ChangePasswordResp);
+
+  // Book
+  rpc GetBookList(GetBookListReq) returns (GetBookListResp);
+  rpc CreateBook(CreateBookReq) returns (CreateBookResp);
+  rpc GetBookDetail(GetBookDetailReq) returns (GetBookDetailResp);
+  rpc SetBookRating(SetBookRatingReq) returns (SetBookRatingResp);
+  rpc DeleteBook(DeleteBookReq) returns (DeleteBookResp);
+
   // Recommend
-  rpc GetRecommendedBooks (GetRecommendedBooksReq) returns (GetRecommendedBooksResp);
-  
+  // 先只做书籍的个性化推荐，协同过滤推荐算法，还要考虑混合新鲜内容以及新用户的冷启动问题
+  rpc GetRecommendedBooks(GetRecommendedBooksReq) returns (GetRecommendedBooksResp);
+
   // Interaction
-  rpc RecordBookView (RecordBookViewReq) returns (RecordBookViewResp);
-  rpc RecordBookRating (RecordBookRatingReq) returns (RecordBookRatingResp);
-  
-  // Topics
-  rpc GetTopics (GetTopicsReq) returns (GetTopicsResp);
-  rpc CreateTopic (CreateTopicReq) returns (CreateTopicResp);
-  rpc GetTopic (GetTopicReq) returns (GetTopicResp);
-  rpc UpdateTopic (UpdateTopicReq) returns (UpdateTopicResp);
-  rpc DeleteTopic (DeleteTopicReq) returns (DeleteTopicResp);
-  
+  rpc RecordBookView(RecordBookViewReq) returns (RecordBookViewResp);
+  rpc RecordBookRating(RecordBookRatingReq) returns (RecordBookRatingResp);
+  rpc RecordBookComment(RecordBookCommentReq) returns (RecordBookCommentResp);
+
+  // Topic
+  rpc GetTopicList(GetTopicListReq) returns (GetTopicListResp);
+  rpc CreateTopic(CreateTopicReq) returns (CreateTopicResp);
+  rpc GetTopicDetail(GetTopicDetailReq) returns (GetTopicDetailResp);
+  rpc LikeTopic(LikeTopicReq) returns (LikeTopicResp);
+  rpc DeleteTopic(DeleteTopicReq) returns (DeleteTopicResp);
+
   // Follow
-  rpc FollowUser (FollowUserReq) returns (FollowResp);
-  rpc UnfollowUser (UnfollowUserReq) returns (FollowResp);
-  rpc GetFollowingList (GetFollowingReq) returns (FollowListResp);
-  rpc GetFollowersList (GetFollowersReq) returns (FollowListResp);
+  rpc FollowUser(FollowUserReq) returns (FollowResp);
+  rpc UnfollowUser(UnfollowUserReq) returns (FollowResp);
+  rpc GetFollowingList(GetFollowingReq) returns (FollowListResp);
+  rpc GetFollowersList(GetFollowersReq) returns (FollowListResp);
+
+  // Manager
+  rpc GetUserList(GetUserListReq) returns (GetUserListResp);
+  rpc GetTagList(GetTagListReq) returns (GetTagListResp); // 书籍会有兴趣标签，在创建书籍时会添加
+  rpc AddTag(AddTagReq) returns (AddTagResp);
+  rpc DeleteTag(DeleteTagReq) returns (DeleteTagResp);
+}
+message GetUserListReq {
+  uint32 page = 1;
+  uint32 page_size = 2;
 }
 
+message GetUserListResp { repeated UserInfo users = 1; }
+message RecordBookCommentReq {
+  uint32 user_id = 1;
+  uint32 book_id = 2;
+}
+
+message RecordBookCommentResp {}
+
+// Tag Messages
+message AddTagReq { string name = 1; }
+
+message AddTagResp {
+  uint32 id = 1;
+  string message = 2;
+}
+
+message DeleteTagReq { uint32 id = 1; }
+
+message DeleteTagResp { string message = 1; }
+message GetTagListReq {
+  uint32 page = 1;
+  uint32 page_size = 2;
+}
+message GetTagListResp { repeated Tag tags = 1; }
+
+message Tag {
+  uint32 id = 1;
+  string name = 2;
+}
 // Follow Messages
 message FollowUserReq {
   uint32 user_id = 1;
@@ -71,9 +112,7 @@ message FollowListResp {
   uint32 total = 2;
 }
 
-message FollowResp {
-  string message = 1;
-}
+message FollowResp { string message = 1; }
 
 message UserInfo {
   uint32 id = 1;
@@ -94,14 +133,10 @@ message RegisterReq {
 }
 
 // Register Resp
-message RegisterResp {
-  string message = 1;
-}
+message RegisterResp { string message = 1; }
 
 // GetUserProfile Req
-message GetUserProfileReq {
-  uint32 user_id = 1;
-}
+message GetUserProfileReq { uint32 user_id = 1; }
 
 // GetUserProfile Resp
 message GetUserProfileResp {
@@ -121,9 +156,7 @@ message UpdateUserProfileReq {
 }
 
 // UpdateUserProfile Resp
-message UpdateUserProfileResp {
-  string message = 1;
-}
+message UpdateUserProfileResp { string message = 1; }
 
 // UploadAvatar Req
 message UploadAvatarReq {
@@ -148,13 +181,9 @@ message LoginResp {
   string message = 2;
 }
 
-message LogoutReq {
-  string token = 1;
-}
+message LogoutReq { string token = 1; }
 
-message LogoutResp {
-  string message = 1;
-}
+message LogoutResp { string message = 1; }
 
 message ChangePasswordReq {
   uint32 user_id = 1;
@@ -162,17 +191,15 @@ message ChangePasswordReq {
   string new_password = 3;
 }
 
-message ChangePasswordResp {
-  string message = 1;
-}
+message ChangePasswordResp { string message = 1; }
 
 // Book Messages
-message GetBooksReq {
+message GetBookListReq {
   uint32 page = 1;
   uint32 page_size = 2;
 }
 
-message GetBooksResp {
+message GetBookListResp {
   repeated Book books = 1;
   uint32 total = 2;
 }
@@ -197,15 +224,11 @@ message CreateBookResp {
   string message = 2;
 }
 
-message GetBookReq {
-  uint32 id = 1;
-}
+message GetBookDetailReq { uint32 id = 1; }
 
-message GetBookResp {
-  Book book = 1;
-}
+message GetBookDetailResp { Book book = 1; }
 
-message UpdateBookReq {
+message SetBookRatingReq {
   uint32 id = 1;
   string title = 2;
   string author = 3;
@@ -213,17 +236,11 @@ message UpdateBookReq {
   string description = 5;
 }
 
-message UpdateBookResp {
-  string message = 1;
-}
+message SetBookRatingResp { string message = 1; }
 
-message DeleteBookReq {
-  uint32 id = 1;
-}
+message DeleteBookReq { uint32 id = 1; }
 
-message DeleteBookResp {
-  string message = 1;
-}
+message DeleteBookResp { string message = 1; }
 
 // Recommend Messages
 message GetRecommendedBooksReq {
@@ -231,9 +248,7 @@ message GetRecommendedBooksReq {
   uint32 limit = 2;
 }
 
-message GetRecommendedBooksResp {
-  repeated Book books = 1;
-}
+message GetRecommendedBooksResp { repeated Book books = 1; }
 
 // Interaction Messages
 message RecordBookViewReq {
@@ -241,9 +256,7 @@ message RecordBookViewReq {
   uint32 book_id = 2;
 }
 
-message RecordBookViewResp {
-  string message = 1;
-}
+message RecordBookViewResp { string message = 1; }
 
 message RecordBookRatingReq {
   uint32 user_id = 1;
@@ -251,17 +264,15 @@ message RecordBookRatingReq {
   uint32 rating = 3;
 }
 
-message RecordBookRatingResp {
-  string message = 1;
-}
+message RecordBookRatingResp { string message = 1; }
 
 // Topic Messages
-message GetTopicsReq {
+message GetTopicListReq {
   uint32 page = 1;
   uint32 page_size = 2;
 }
 
-message GetTopicsResp {
+message GetTopicListResp {
   repeated Topic topics = 1;
   uint32 total = 2;
 }
@@ -284,28 +295,18 @@ message CreateTopicResp {
   string message = 2;
 }
 
-message GetTopicReq {
-  uint32 id = 1;
-}
+message GetTopicDetailReq { uint32 id = 1; }
 
-message GetTopicResp {
-  Topic topic = 1;
-}
+message GetTopicDetailResp { Topic topic = 1; }
 
-message UpdateTopicReq {
+message LikeTopicReq {
   uint32 id = 1;
   string title = 2;
   string content = 3;
 }
 
-message UpdateTopicResp {
-  string message = 1;
-}
+message LikeTopicResp { string message = 1; }
 
-message DeleteTopicReq {
-  uint32 id = 1;
-}
+message DeleteTopicReq { uint32 id = 1; }
 
-message DeleteTopicResp {
-  string message = 1;
-}
+message DeleteTopicResp { string message = 1; }

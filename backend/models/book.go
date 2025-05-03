@@ -8,14 +8,14 @@ import (
 
 type Book struct {
 	gorm.Model
-	Title        string   `gorm:"size:255;not null"`
-	Author       string   `gorm:"size:100;index"`
-	Description  string   `gorm:"type:text"`
-	Cover        string   `gorm:"size:255"`
-	Rating       float64  `gorm:"type:decimal(3,1)"`
-	CategoryID   uint     `gorm:"index"`
-	ViewCount    uint     `gorm:"default:0"`
-	CategoryTags []string `gorm:"type:json"` // 书籍分类标签
+	Title       string  `gorm:"size:255;not null"`
+	Author      string  `gorm:"size:100;index"`
+	Description string  `gorm:"type:text"`
+	Cover       string  `gorm:"size:255"`
+	Rating      float64 `gorm:"type:decimal(3,1)"`
+	CategoryID  uint    `gorm:"index"`
+	ViewCount   uint    `gorm:"default:0"`
+	Tag         string  `gorm:"size:255;not null"`
 }
 
 // GetPopularBooks 获取热门书籍

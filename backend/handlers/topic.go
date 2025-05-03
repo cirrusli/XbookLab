@@ -18,7 +18,7 @@ func CreateTopic(c *gin.Context) {
 		return
 	}
 
-	if len(topic.CategoryTags) == 0 {
+	if len(topic.Tag) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
 		return
 	}
@@ -82,12 +82,12 @@ func UpdateTopic(c *gin.Context) {
 		return
 	}
 
-	if len(topic.CategoryTags) == 0 {
+	if len(topic.Tag) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
 		return
 	}
 
-	if len(topic.CategoryTags) == 0 {
+	if len(topic.Tag) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
 		return
 	}

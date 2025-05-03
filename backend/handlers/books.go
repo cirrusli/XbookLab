@@ -21,7 +21,7 @@ func CreateBook(c *gin.Context) {
 		return
 	}
 
-	if len(book.CategoryTags) == 0 {
+	if len(book.Tag) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
 		return
 	}
@@ -51,7 +51,7 @@ func UpdateBook(c *gin.Context) {
 		return
 	}
 
-	if len(book.CategoryTags) == 0 {
+	if len(book.Tag) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
 		return
 	}

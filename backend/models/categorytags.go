@@ -1,12 +1,12 @@
 package models
 
-type Category struct {
+type Tag struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
 // 书籍类目
-var AllBookCategories = []Category{
+var AllBookTags = []Tag{
 	{1, "小说"},
 	{2, "散文"},
 	{3, "诗歌"},

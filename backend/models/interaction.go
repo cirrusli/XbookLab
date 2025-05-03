@@ -13,12 +13,12 @@ var MockGetTopicRecommendations func(uint, int) ([]uint, error)
 // 用户交互记录（包含书籍和话题）
 type UserInteraction struct {
 	gorm.Model
-	UserID       uint    `gorm:"index"`
-	ItemType     string  `gorm:"type:varchar(20);index"` // 枚举值: book/topic
-	ItemID       uint    `gorm:"index"`
-	Rating       float64 `gorm:"type:decimal(3,1)"`
-	ViewCount    uint
-	CategoryTags []string `gorm:"type:json"` // 关联的类目标签
+	UserID    uint    `gorm:"index"`
+	ItemType  string  `gorm:"type:varchar(20);index"` // 枚举值: book/topic
+	ItemID    uint    `gorm:"index"`
+	Rating    float64 `gorm:"type:decimal(3,1)"`
+	ViewCount uint
+	Tag       string `gorm:"size:255;not null"`
 }
 
 // 推荐结果集
@@ -117,29 +117,29 @@ func (r *GormUserInteractionRepo) Create(behavior UserInteraction) error {
 }
 
 func (u *UserInteraction) AfterSave(tx *gorm.DB) (err error) {
-	var tags []string
+	var tag string
 	// 获取关联标签
 	if u.ItemType == "book" {
 		var book Book
 		if err := tx.First(&book, u.ItemID).Error; err != nil {
 			return err
 		}
-		tags = book.CategoryTags
+		tag = book.Tag
 	} else if u.ItemType == "topic" {
 		var topic Topic
 		if err := tx.First(&topic, u.ItemID).Error; err != nil {
 			return err
 		}
-		tags = topic.CategoryTags
+		tag = topic.Tag
 	}
 
 	// 创建行为记录
 	behavior := UserInteraction{
-		UserID:       u.UserID,
-		ItemID:       u.ItemID,
-		ItemType:     u.ItemType,
-		Rating:       u.Rating,
-		CategoryTags: tags,
+		UserID:   u.UserID,
+		ItemID:   u.ItemID,
+		ItemType: u.ItemType,
+		Rating:   u.Rating,
+		Tag:      tag,
 	}
 	return tx.Create(&behavior).Error
 }
