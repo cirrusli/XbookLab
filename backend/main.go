@@ -57,16 +57,16 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	// 认证相关路由
 	auth := r.Group("/api/auth")
 	{
-		auth.POST("/register", handlers.Register)
 		auth.POST("/login", handlers.Login)
 		auth.POST("/logout", handlers.Logout)
 		auth.PUT("/change-password", middleware.AuthMiddleware(), handlers.ChangePassword)
 	}
 
-	// 用户相关路由 (需要认证)
+	// 用户相关路由
 	user := r.Group("/api/user")
 	user.Use(middleware.AuthMiddleware())
 	{
+		user.POST("/register", handlers.Register)
 		user.GET("/profile", handlers.GetUserProfile)
 		user.PUT("/profile", handlers.UpdateUserProfile)
 		user.POST("/avatar", handlers.UploadAvatar)
@@ -77,13 +77,13 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	}
 
 	// 书籍相关路由
-	books := r.Group("/api/books")
+	book := r.Group("/api/book")
 	{
-		books.GET("/", handlers.GetBooks)
-		books.POST("/", handlers.CreateBook)
-		books.GET("/:id", handlers.GetBook)
-		books.PUT("/:id", handlers.UpdateBook)
-		books.DELETE("/:id", handlers.DeleteBook)
+		book.GET("/", handlers.GetBookList)
+		book.POST("/", handlers.CreateBook)
+		book.GET("/:id", handlers.GetBookDetail)
+		book.PUT("/:id", handlers.UpdateBook)
+		book.DELETE("/:id", handlers.DeleteBook)
 	}
 
 	// 推荐书籍路由

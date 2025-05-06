@@ -1,49 +1,49 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import Feed from '../views/Feed.vue';
+import PublishGuide from '../views/PublishGuide.vue';
+import UserManagement from '../views/UserManagement.vue';
+import SearchResults from '../views/SearchResults.vue';
+import { useAuthStore } from '../store/auth';
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('@/views/HomeView.vue'),
-    children: [
-      {
-        path: 'groups',
-        name: 'groups',
-        component: () => import('@/views/GroupsView.vue')
-      },
-      {
-        path: 'hot',
-        name: 'hot',
-        component: () => import('@/views/HotView.vue')
-      },
-      {
-        path: 'friends',
-        name: 'friends',
-        component: () => import('@/views/FriendsView.vue')
-      },
-      {
-        path: 'random',
-        name: 'random',
-        component: () => import('@/views/RandomView.vue')
-      },
-      {
-        path: '',
-        redirect: '/groups'
-      },
-      {
-        path: '/book/:id',
-        name: 'book-detail',
-        component: () => import('@/views/BookDetail.vue')
-      },
-      {
-        path: '/profile',
-        name: 'profile',
-        component: () => import('@/views/UserProfile.vue')
-      }
-    ]
+    component: Feed,
   },
-]
+  {
+    path: '/search',
+    component: SearchResults,
+  },
+  {
+    path: '/publish',
+    component: PublishGuide,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/users',
+    component: UserManagement,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+];
 
-export default createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
+
+// 导航守卫
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  
+  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+    // 如果需要登录但未登录，重定向到首页
+    next('/');
+  } else if (to.meta.requiresAdmin && authStore.userInfo?.role !== 'admin') {
+    // 如果需要管理员权限但用户不是管理员，重定向到首页
+    next('/');
+  } else {
+    next();
+  }
+});
+
+export default router; 

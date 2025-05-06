@@ -1,3 +1,4 @@
+``` protobuf
 syntax = "proto3";
 
 package xbooklab;
@@ -214,7 +215,7 @@ message GetBookDetailReq { uint32 book_id = 1; }
 
 message GetBookDetailResp { Book book = 1; }
 
-message SetBookRatingReq {  
+message SetBookRatingReq {
   uint32 book_id = 1; // 书籍id
   uint32 rating = 2;  // 评分，0-10
   uint32 user_id = 3; // 用户id
@@ -300,3 +301,5 @@ message User {
   string bio = 5;
   repeated Tag tags = 6; // 兴趣标签，例如科技、历史、心理、艺术、哲学等
 }
+```
+

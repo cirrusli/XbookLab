@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetBooks(c *gin.Context) {
+func GetBookList(c *gin.Context) {
 	var books []models.Book
 	models.DB.Find(&books)
 	c.JSON(http.StatusOK, books)
@@ -29,7 +29,7 @@ func CreateBook(c *gin.Context) {
 	c.JSON(http.StatusCreated, book)
 }
 
-func GetBook(c *gin.Context) {
+func GetBookDetail(c *gin.Context) {
 	id := c.Param("id")
 	var book models.Book
 	if err := models.DB.First(&book, id).Error; err != nil {
