@@ -13,30 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// 初始化MySQL连接
-func initMySQL() *gorm.DB {
-	// 先连接无库名实例创建数据库
-	createDB, _ := gorm.Open(mysql.Open("root:lzq@tcp(localhost:3306)/?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
-	createDB.Exec("CREATE DATABASE IF NOT EXISTS x_book_lab")
-
-	// 连接目标数据库
-	dsn := "root:lzq@tcp(localhost:3306)/x_book_lab_test?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("MySQL连接失败:", err)
-	}
-	return db
-}
-
-// 初始化Redis连接
-func initRedis() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-}
-
 func main() {
 	db := initMySQL()
 	rdb := initRedis()
@@ -47,9 +23,9 @@ func main() {
 		log.Fatal("服务启动失败:", err)
 	}
 }
+
 func InitRouter() *gin.Engine {
 	r := gin.Default()
-	r.Use(gin.Logger(), gin.Recovery())
 
 	// 认证相关路由
 	auth := r.Group("/api/auth")
@@ -145,4 +121,28 @@ func InitRouter() *gin.Engine {
 	}
 
 	return r
+}
+
+// 初始化MySQL连接
+func initMySQL() *gorm.DB {
+	// 先连接无库名实例创建数据库
+	createDB, _ := gorm.Open(mysql.Open("root:lzq@tcp(localhost:3306)/?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
+	createDB.Exec("CREATE DATABASE IF NOT EXISTS x_book_lab")
+
+	// 连接目标数据库
+	dsn := "root:lzq@tcp(localhost:3306)/x_book_lab_test?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal("MySQL连接失败:", err)
+	}
+	return db
+}
+
+// 初始化Redis连接
+func initRedis() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
 }
