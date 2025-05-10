@@ -2,21 +2,17 @@ package models
 
 import (
 	"math/rand"
-
-	"gorm.io/gorm"
+	"time"
 )
 
 // Topic 话题模型
 type Topic struct {
-	gorm.Model
-	Title      string  `gorm:"size:255;not null"`
-	Content    string  `gorm:"type:text;not null"`
-	AuthorID   uint    `gorm:"not null"`
-	ViewCount  uint    `gorm:"default:0"`
-	Tag        string  `gorm:"size:255;not null"`
-	HeatScore  float64 `gorm:"type:decimal(4,1);default:0.0"` // 热度评分（根据浏览、回复等计算）
-	ReplyCount uint    `gorm:"default:0"`
-	Status     string  `gorm:"size:20;default:'active'"`
+	TopicID      uint      `gorm:"primaryKey;autoIncrement"`
+	Title        string    `gorm:"size:255;not null"`
+	Content      string    `gorm:"type:text"`
+	AuthorUserID uint      `gorm:"index"`
+	LikeCount    uint      `gorm:"default:0"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
 
 // GetRandomTopics 获取随机话题

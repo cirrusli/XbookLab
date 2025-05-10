@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"xbooklab/models"
 
@@ -12,14 +11,13 @@ import (
 type RegisterRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Nickname string `json:"nickname"`
 	Avatar   string `json:"avatar"`
 	Bio      string `json:"bio"`
 	Email    string `json:"email"`
 }
 
 type UpdateUserRequest struct {
-	Nickname string `json:"nickname"`
+	Username string `json:"username"`
 	Avatar   string `json:"avatar"`
 	Bio      string `json:"bio"`
 }
@@ -34,12 +32,9 @@ func Register(c *gin.Context) {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	user := models.User{
 		Username:            req.Username,
-		PasswordHash:        string(hashedPassword),
-		Nickname:            req.Nickname,
+		Password:        string(hashedPassword),
 		Avatar:              req.Avatar,
 		Bio:                 req.Bio,
-		Email:               req.Email,
-		CategoryPreferences: make(map[string]int),
 	}
 	if err := models.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "注册失败" + err.Error()})
@@ -59,9 +54,8 @@ func GetUserProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"id":       user.ID,
+		"id":       user.UserID,
 		"username": user.Username,
-		"nickname": user.Nickname,
 		"avatar":   user.Avatar,
 		"bio":      user.Bio,
 	})
@@ -82,7 +76,6 @@ func UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	user.Nickname = req.Nickname
 	user.Avatar = req.Avatar
 	user.Bio = req.Bio
 
@@ -92,87 +85,4 @@ func UpdateUserProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "用户信息更新成功"})
-}
-
-// FollowUser 关注用户
-func FollowUser(c *gin.Context) {
-	userID := c.MustGet("userID").(uint)
-	followID := c.Param("id")
-	log.Println("followID:", followID) // 打印日志，查看是否正确获取到 followID
-	log.Println("userID:", userID)     // 打印日志，查看是否正确获取到 userID
-	err := models.FollowUser(userID, followID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "关注操作失败"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "关注成功"})
-}
-
-// UnfollowUser 取消关注
-func UnfollowUser(c *gin.Context) {
-	userID := c.MustGet("userID").(uint)
-	followID := c.Param("id")
-
-	err := models.UnfollowUser(userID, followID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "取消关注失败"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "取消关注成功"})
-}
-
-// GetFollowing 获取关注列表
-func GetFollowing(c *gin.Context) {
-	userID := c.MustGet("userID").(uint)
-	following, err := models.GetFollowing(userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取关注列表失败"})
-		return
-	}
-	c.JSON(http.StatusOK, following)
-}
-
-// GetFollowers 获取粉丝列表
-func GetFollowers(c *gin.Context) {
-	userID := c.MustGet("userID").(uint)
-	followers, err := models.GetFollowers(userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取粉丝列表失败"})
-		return
-	}
-	c.JSON(http.StatusOK, followers)
-}
-
-func UploadAvatar(c *gin.Context) {
-	userID := c.MustGet("userID").(uint)
-
-	file, err := c.FormFile("avatar")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请上传头像文件"})
-		return
-	}
-
-	// 这里应该实现文件保存逻辑，返回文件路径
-	avatarPath := "/uploads/" + file.Filename
-	if saveErr := c.SaveUploadedFile(file, "./uploads/"+file.Filename); saveErr != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存头像文件失败"})
-		return
-	}
-
-	user, err := models.GetUserByID(userID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
-		return
-	}
-
-	user.Avatar = avatarPath
-	if err := models.UpdateUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新用户头像失败"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"avatar":  avatarPath,
-		"message": "头像上传成功",
-	})
 }

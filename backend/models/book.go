@@ -1,59 +1,30 @@
 package models
 
 import (
-	"strconv"
-
-	"gorm.io/gorm"
+	"time"
 )
 
 type Book struct {
-	gorm.Model
-	Title       string  `gorm:"size:255;not null"`
-	Author      string  `gorm:"size:100;index"`
-	Description string  `gorm:"type:text"`
-	Cover       string  `gorm:"size:255"`
-	Rating      float64 `gorm:"type:decimal(3,1)"`
-	CategoryID  uint    `gorm:"index"`
-	ViewCount   uint    `gorm:"default:0"`
-	Tag         string  `gorm:"size:255;not null"`
+	BookID        uint      `gorm:"primaryKey;autoIncrement"`
+	Title         string    `gorm:"size:255;not null"`
+	Author        string    `gorm:"size:100"`
+	Cover         string    `gorm:"size:255"`
+	Description   string    `gorm:"type:text"`
+	AverageRating float64   `gorm:"type:decimal(3,1);default:0.0"`
+	CreatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
 
-// GetPopularBooks 获取热门书籍
-func GetPopularBooks(limit int) []uint {
+// GetPopularBooks 获取高分书籍
+func GetPopularBooks(limit int) []Book {
 	var books []Book
-	DB.Order("view_count desc").Limit(limit).Find(&books)
+	DB.Order("average_rating desc").Limit(limit).Find(&books)
 
-	var ids []uint
-	for _, book := range books {
-		ids = append(ids, book.ID)
-	}
-	return ids
+	return books
 }
 
-func GetRecommendedBooks(page, pageSize int, categoryID string, userID uint) ([]Book, int64) {
+// GetBooks 获取书籍列表
+func GetBooks(limit int) []Book {
 	var books []Book
-	var total int64
-
-	// 如果有登录用户，使用协同过滤推荐
-	if userID > 0 {
-		recommendedBooks, err := GetUserBasedCFRecommendations(userID, pageSize, &GormUserInteractionRepo{db: DB})
-		if err == nil && len(recommendedBooks) > 0 {
-			books = recommendedBooks
-			total = int64(len(books))
-			return books, total
-		}
-	}
-
-	// 如果没有登录用户或推荐失败，使用默认推荐(按评分排序)
-	query := DB.Model(&Book{}).Order("rating DESC")
-
-	if categoryID != "" {
-		cid, _ := strconv.Atoi(categoryID)
-		query = query.Where("category_id = ?", cid)
-	}
-
-	query.Count(&total)
-	query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&books)
-
-	return books, total
+	DB.Limit(limit).Find(&books)
+	return books
 }

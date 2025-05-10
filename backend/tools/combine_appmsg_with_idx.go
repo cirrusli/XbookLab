@@ -5,10 +5,10 @@ package main
 func CombineWithIdxHigh(idx uint32, appmsgID uint32) uint64 {
 	return (uint64(idx) << 32) | uint64(appmsgID)
 }
-func main() {
-	// 示例使用
-	idx := uint32(1)
-	appmsgID := uint32(2247483957)
-	combined := CombineWithIdxHigh(idx, appmsgID)
-	println(combined)
-}
+// func main() {
+// 	// 示例使用
+// 	idx := uint32(1)
+// 	appmsgID := uint32(2247483957)
+// 	combined := CombineWithIdxHigh(idx, appmsgID)
+// 	println(combined)
+// }

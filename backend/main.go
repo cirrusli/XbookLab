@@ -20,7 +20,7 @@ func initMySQL() *gorm.DB {
 	createDB.Exec("CREATE DATABASE IF NOT EXISTS x_book_lab")
 
 	// 连接目标数据库
-	dsn := "root:lzq@tcp(localhost:3306)/x_book_lab?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:lzq@tcp(localhost:3306)/x_book_lab_test?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("MySQL连接失败:", err)
@@ -40,9 +40,7 @@ func initRedis() *redis.Client {
 func main() {
 	db := initMySQL()
 	models.SetDB(db)
-	db.AutoMigrate(&models.Book{}, &models.User{}, &models.UserInteraction{}, &models.Topic{}, &models.Recommendation{})
 
-	// 初始化Redis客户端
 	rdb := initRedis()
 
 	r := InitRouter(db, rdb)
@@ -69,7 +67,6 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 		user.POST("/register", handlers.Register)
 		user.GET("/profile", handlers.GetUserProfile)
 		user.PUT("/profile", handlers.UpdateUserProfile)
-		user.POST("/avatar", handlers.UploadAvatar)
 		user.POST("/follow/:id", handlers.FollowUser)
 		user.DELETE("/follow/:id", handlers.UnfollowUser)
 		user.GET("/following", handlers.GetFollowing)
@@ -82,7 +79,6 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 		book.GET("/", handlers.GetBookList)
 		book.POST("/", handlers.CreateBook)
 		book.GET("/:id", handlers.GetBookDetail)
-		book.PUT("/:id", handlers.UpdateBook)
 		book.DELETE("/:id", handlers.DeleteBook)
 	}
 
@@ -90,11 +86,11 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	r.GET("/api/recommend", handlers.GetRecommendedBooks)
 
 	// 用户行为路由
-	interaction := r.Group("/api/interaction")
-	interaction.Use(middleware.AuthMiddleware())
+	record := r.Group("/api/record")
+	record.Use(middleware.AuthMiddleware())
 	{
-		interaction.POST("/view/:bookId", handlers.RecordBookView)
-		interaction.POST("/rate/:bookId", handlers.RecordBookRating)
+		record.POST("/view/:bookId", handlers.RecordBookView)
+		record.POST("/rate/:bookId", handlers.RecordBookRating)
 	}
 
 	// 话题相关路由
@@ -105,6 +101,30 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 		topics.GET("/:id", handlers.GetTopic)
 		topics.PUT("/:id", handlers.UpdateTopic)
 		topics.DELETE("/:id", handlers.DeleteTopic)
+	}
+
+	// 评论相关路由
+	comments := r.Group("/api/comments")
+	comments.Use(middleware.AuthMiddleware())
+	{
+		comments.POST("/", handlers.CreateComment)
+		comments.GET("/:targetType/:targetId", handlers.GetComments)
+		comments.DELETE("/:id", handlers.DeleteComment)
+	}
+
+	// 点赞相关路由
+	likes := r.Group("/api/likes")
+	likes.Use(middleware.AuthMiddleware())
+	{
+		likes.POST("/topic/:id", handlers.LikeTopic)
+		likes.DELETE("/topic/:id", handlers.UnlikeTopic)
+	}
+
+	// 用户动态路由
+	events := r.Group("/api/events")
+	events.Use(middleware.AuthMiddleware())
+	{
+		events.GET("/", handlers.GetUserEvents)
 	}
 
 	return r

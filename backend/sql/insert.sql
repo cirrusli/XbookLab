@@ -23,19 +23,19 @@ WHERE
     (u.username = 'elon-musk' AND t.tag_name = '科技');
 
 -- 插入书籍
-INSERT INTO book (title, author, cover, description) VALUES
-('三体', '刘慈欣', 'https://img9.doubanio.com/view/subject/s/public/s2768378.jpg', '中国科幻文学的里程碑之作，讲述地球文明与三体文明的接触与冲突。'),
-('人类简史', '尤瓦尔·赫拉利', 'https://img9.doubanio.com/view/subject/s/public/s27814883.jpg', '从动物到上帝的历史叙事，从认知革命到科学革命，重新审视人类历史的发展脉络。'),
-('百年孤独', '加西亚·马尔克斯', 'https://img9.doubanio.com/view/subject/s/public/s6384944.jpg', '魔幻现实主义文学的代表作，讲述布恩迪亚家族七代人的传奇故事。'),
-('黑镜：未来预言', '查理·布鲁克', 'https://img3.doubanio.com/view/subject/l/public/s33491253.jpg', '科技反乌托邦短篇集'),
-('禅与摩托车维修艺术', '罗伯特·波西格', 'https://img3.doubanio.com/view/subject/l/public/s29831183.jpg', '哲学与旅行的融合'),
-('活着', '余华', 'https://img9.doubanio.com/view/subject/s/public/s29053580.jpg', '讲述一个人在中国社会变革中的苦难与坚韧。'),
-('原则', '瑞·达利欧', 'https://img9.doubanio.com/view/subject/s/public/s29651109.jpg', '桥水基金创始人分享他的生活和工作原则。'),
-('小王子', '圣埃克苏佩里', 'https://img9.doubanio.com/view/subject/s/public/s1103152.jpg', '一部写给大人的童话，探讨爱与责任的真谛。'),
-('思考，快与慢', '丹尼尔·卡尼曼', 'https://img9.doubanio.com/view/subject/s/public/s6907698.jpg', '诺贝尔经济学奖得主揭示人类思维的两种系统。'),
-('沉默的大多数', '王小波', 'https://img9.doubanio.com/view/subject/s/public/s1447349.jpg', '王小波杂文代表作，展现其独特的思想与文风。'),
-('局外人', '阿尔贝·加缪', 'https://img9.doubanio.com/view/subject/s/public/s4468484.jpg', '存在主义文学的代表作，讲述一个局外人的故事。'),
-('未来简史', '尤瓦尔·赫拉利', 'https://img9.doubanio.com/view/subject/s/public/s29287103.jpg', '探讨人类未来可能面临的重大变革与挑战。');
+INSERT INTO book (title, author, cover, description,average_rating) VALUES
+('三体', '刘慈欣', 'https://img9.doubanio.com/view/subject/s/public/s2768378.jpg', '中国科幻文学的里程碑之作，讲述地球文明与三体文明的接触与冲突。', 9.0),
+('人类简史', '尤瓦尔·赫拉利', 'https://img9.doubanio.com/view/subject/s/public/s27814883.jpg', '从动物到上帝的历史叙事，从认知革命到科学革命，重新审视人类历史的发展脉络。', 8.5),
+('百年孤独', '加西亚·马尔克斯', 'https://img9.doubanio.com/view/subject/s/public/s6384944.jpg', '魔幻现实主义文学的代表作，讲述布恩迪亚家族七代人的传奇故事。', 8.0),
+('黑镜：未来预言', '查理·布鲁克', 'https://img3.doubanio.com/view/subject/l/public/s33491253.jpg', '科技反乌托邦短篇集', 8.5),
+('禅与摩托车维修艺术', '罗伯特·波西格', 'https://img3.doubanio.com/view/subject/l/public/s29831183.jpg', '哲学与旅行的融合', 8.0),
+('活着', '余华', 'https://img9.doubanio.com/view/subject/s/public/s29053580.jpg', '讲述一个人在中国社会变革中的苦难与坚韧。',9.1),
+('原则', '瑞·达利欧', 'https://img9.doubanio.com/view/subject/s/public/s29651109.jpg', '桥水基金创始人分享他的生活和工作原则。', 8.0),
+('小王子', '圣埃克苏佩里', 'https://img9.doubanio.com/view/subject/s/public/s1103152.jpg', '一部写给大人的童话，探讨爱与责任的真谛。',9.4),
+('思考，快与慢', '丹尼尔·卡尼曼', 'https://img9.doubanio.com/view/subject/s/public/s6907698.jpg', '诺贝尔经济学奖得主揭示人类思维的两种系统。',8.7),
+('沉默的大多数', '王小波', 'https://img9.doubanio.com/view/subject/s/public/s1447349.jpg', '王小波杂文代表作，展现其独特的思想与文风。',8.2),
+('局外人', '阿尔贝·加缪', 'https://img9.doubanio.com/view/subject/s/public/s4468484.jpg', '存在主义文学的代表作，讲述一个局外人的故事。',8.9),
+('未来简史', '尤瓦尔·赫拉利', 'https://img9.doubanio.com/view/subject/s/public/s29287103.jpg', '探讨人类未来可能面临的重大变革与挑战。',7.8);
 
 -- 书籍标签关联数据
 INSERT INTO book_tag (book_id, tag_id)

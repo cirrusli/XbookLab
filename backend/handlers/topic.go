@@ -9,6 +9,65 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+type GetTopicListRequest struct {
+	Offset     uint `json:"offset"`
+	Limit      uint `json:"limit"`
+	TagFilter  uint `json:"tag_filter"`
+}
+
+type GetTopicListResponse struct {
+	Topics []Topic `json:"topics"`
+	Total  uint    `json:"total"`
+}
+
+type CreateTopicRequest struct {
+	Title         string `json:"title"`
+	Content       string `json:"content"`
+	AuthorUserID uint   `json:"author_user_id"`
+}
+
+type CreateTopicResponse struct {
+	TopicID   uint   `json:"topic_id"`
+	Code      uint   `json:"code"`
+	Message   string `json:"message"`
+}
+
+type GetTopicDetailRequest struct {
+	TopicID uint `json:"topic_id"`
+}
+
+type GetTopicDetailResponse struct {
+	Topic Topic `json:"topic"`
+}
+
+type LikeTopicRequest struct {
+	UserID  uint `json:"user_id"`
+	TopicID uint `json:"topic_id"`
+}
+
+type LikeTopicResponse struct {
+	Code    uint   `json:"code"`
+	Message string `json:"message"`
+}
+
+type DeleteTopicRequest struct {
+	TopicID uint `json:"topic_id"`
+}
+
+type DeleteTopicResponse struct {
+	Code    uint   `json:"code"`
+	Message string `json:"message"`
+}
+
+type Topic struct {
+	TopicID      uint   `json:"topic_id"`
+	Title        string `json:"title"`
+	Content      string `json:"content"`
+	AuthorUserID uint   `json:"author_user_id"`
+	LikeCount    uint   `json:"like_count"`
+	TagName      string `json:"tag_name"`
+}
+
 
 // 创建话题
 func CreateTopic(c *gin.Context) {
@@ -18,10 +77,10 @@ func CreateTopic(c *gin.Context) {
 		return
 	}
 
-	if len(topic.Tag) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
-		return
-	}
+	// if len(topic.Tag) == 0 {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
+	// 	return
+	// }
 
 	db := models.GetDB()
 	if err := db.Create(&topic).Error; err != nil {
@@ -70,7 +129,7 @@ func GetTopic(c *gin.Context) {
 
 // 更新话题
 func UpdateTopic(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	_, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的话题ID"})
 		return
@@ -82,17 +141,17 @@ func UpdateTopic(c *gin.Context) {
 		return
 	}
 
-	if len(topic.Tag) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
-		return
-	}
+	// if len(topic.Tag) == 0 {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
+	// 	return
+	// }
 
-	if len(topic.Tag) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
-		return
-	}
+	// if len(topic.Tag) == 0 {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
+	// 	return
+	// }
 
-	topic.ID = uint(id)
+	// topic.ID = uint(id)
 	db := models.GetDB()
 
 	if err := db.Save(&topic).Error; err != nil {
