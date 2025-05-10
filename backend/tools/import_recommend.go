@@ -116,25 +116,18 @@ func getAllUserIDs(db *sql.DB) []uint {
 func calculateUserRecommendations(db *sql.DB, userID uint) []Recommendation {
 	// 1. 获取用户评分数据
 	userRatings := getUserRatings(db, userID)
-
 	// 2. 获取用户浏览记录
 	userViews := getUserViews(db, userID)
-
 	// 3. 获取用户标签
 	userTags := getUserTags(db, userID)
-
 	// 4. 获取关注用户
 	followedUsers := getFollowedUsers(db, userID)
-
 	// 5. 计算相似用户
 	similarUsers := calculateSimilarUsers(db, userID, userRatings, userViews, userTags)
-
 	// 6. 合并所有潜在推荐来源
 	recommendationSources := append(similarUsers, followedUsers...)
-
 	// 7. 计算推荐书籍
 	recommendedBooks := calculateRecommendedBooks(db, userID, recommendationSources, userTags)
-
 	// 8. 生成推荐结果
 	var recommendations []Recommendation
 	for bookID, score := range recommendedBooks {
@@ -422,7 +415,35 @@ func calculateRecommendedBooks(db *sql.DB, userID uint, sourceUsers []uint, user
 
 	return recommendations
 }
-
+// 探索性推荐逻辑
+func getExplorationBooks(db *sql.DB, userID uint) map[uint]float64 {
+	explore := make(map[uint]float64)
+	rows, err := db.Query(`
+		SELECT b.book_id, r.avg_rating
+		FROM book_tag bt
+		JOIN (
+			SELECT book_id, AVG(rating_value) as avg_rating
+			FROM rating
+			GROUP BY book_id
+			HAVING avg_rating >= 8.0
+		) r ON bt.book_id = r.book_id
+		WHERE bt.tag_id NOT IN (
+			SELECT tag_id FROM user_tag WHERE user_id = ?
+		)
+		ORDER BY r.avg_rating DESC
+		LIMIT 2`, userID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var bookID uint
+			var rating float64
+			if err := rows.Scan(&bookID, &rating); err == nil {
+				explore[bookID] = rating * 0.3 // 探索性权重
+			}
+		}
+	}
+	return explore
+}
 // 批量插入推荐结果
 func insertRecommendations(db *sql.DB, recommendations []Recommendation) {
 	tx, err := db.Begin()
