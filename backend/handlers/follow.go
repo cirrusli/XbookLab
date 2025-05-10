@@ -45,26 +45,14 @@ func FollowUser(c *gin.Context) {
 		return
 	}
 
-	// 不能关注自己
-	if uint(followedID) == userID {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "不能关注自己"})
-		return
-	}
-
-	// 检查是否已关注
-	var existingFollow models.Follow
-	if err := models.DB.Where("follower_id = ? AND followed_id = ?", userID, followedID).First(&existingFollow).Error; err == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "已关注该用户"})
-		return
-	}
-
-	// 创建关注关系
-	follow := models.Follow{
-		FollowerID: userID,
-		FollowedID: uint(followedID),
-	}
-	if err := models.DB.Create(&follow).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "关注失败"})
+	if err := models.CreateFollow(userID, uint(followedID)); err != nil {
+		if err == models.ErrCannotFollowSelf {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "不能关注自己"})
+		} else if err == models.ErrAlreadyFollowed {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "已关注该用户"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "关注失败"})
+		}
 		return
 	}
 
@@ -80,8 +68,7 @@ func UnfollowUser(c *gin.Context) {
 		return
 	}
 
-	// 删除关注关系
-	if err := models.DB.Where("follower_id = ? AND followed_id = ?", userID, followedID).Delete(&models.Follow{}).Error; err != nil {
+	if err := models.DeleteFollow(userID, uint(followedID)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "取消关注失败"})
 		return
 	}
@@ -92,8 +79,8 @@ func UnfollowUser(c *gin.Context) {
 // GetFollowing 获取关注列表
 func GetFollowing(c *gin.Context) {
 	userID := c.GetUint("userID")
-	var follows []models.Follow
-	if err := models.DB.Preload("Followed").Where("follower_id = ?", userID).Find(&follows).Error; err != nil {
+	follows, err := models.GetFollowing(userID)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取关注列表失败"})
 		return
 	}
@@ -114,8 +101,8 @@ func GetFollowing(c *gin.Context) {
 // GetFollowers 获取粉丝列表
 func GetFollowers(c *gin.Context) {
 	userID := c.GetUint("userID")
-	var follows []models.Follow
-	if err := models.DB.Preload("Follower").Where("followed_id = ?", userID).Find(&follows).Error; err != nil {
+	follows, err := models.GetFollowers(userID)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取粉丝列表失败"})
 		return
 	}
