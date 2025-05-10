@@ -1,4 +1,5 @@
 package handlers
+
 import (
 	"net/http"
 	"strconv"
@@ -7,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
 type FollowUserRequest struct {
 	UserID       uint `json:"user_id"`
 	FollowUserID uint `json:"follow_user_id"`
@@ -34,11 +36,9 @@ type FollowResponse struct {
 	Message string `json:"message"`
 }
 
-
-
 // FollowUser 关注用户
 func FollowUser(c *gin.Context) {
-	currentUser := c.MustGet("user").(models.User)
+	userID := c.GetUint("userID")
 	followedID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的用户ID"})
@@ -46,21 +46,21 @@ func FollowUser(c *gin.Context) {
 	}
 
 	// 不能关注自己
-	if uint(followedID) == currentUser.UserID {
+	if uint(followedID) == userID {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "不能关注自己"})
 		return
 	}
 
 	// 检查是否已关注
 	var existingFollow models.Follow
-	if err := models.DB.Where("follower_id = ? AND followed_id = ?", currentUser.UserID, followedID).First(&existingFollow).Error; err == nil {
+	if err := models.DB.Where("follower_id = ? AND followed_id = ?", userID, followedID).First(&existingFollow).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "已关注该用户"})
 		return
 	}
 
 	// 创建关注关系
 	follow := models.Follow{
-		FollowerID: currentUser.UserID,
+		FollowerID: userID,
 		FollowedID: uint(followedID),
 	}
 	if err := models.DB.Create(&follow).Error; err != nil {
@@ -73,7 +73,7 @@ func FollowUser(c *gin.Context) {
 
 // UnfollowUser 取消关注用户
 func UnfollowUser(c *gin.Context) {
-	currentUser := c.MustGet("user").(models.User)
+	userID := c.GetUint("userID")
 	followedID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的用户ID"})
@@ -81,7 +81,7 @@ func UnfollowUser(c *gin.Context) {
 	}
 
 	// 删除关注关系
-	if err := models.DB.Where("follower_id = ? AND followed_id = ?", currentUser.UserID, followedID).Delete(&models.Follow{}).Error; err != nil {
+	if err := models.DB.Where("follower_id = ? AND followed_id = ?", userID, followedID).Delete(&models.Follow{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "取消关注失败"})
 		return
 	}
@@ -91,9 +91,9 @@ func UnfollowUser(c *gin.Context) {
 
 // GetFollowing 获取关注列表
 func GetFollowing(c *gin.Context) {
-	currentUser := c.MustGet("user").(models.User)
+	userID := c.GetUint("userID")
 	var follows []models.Follow
-	if err := models.DB.Preload("Followed").Where("follower_id = ?", currentUser.UserID).Find(&follows).Error; err != nil {
+	if err := models.DB.Preload("Followed").Where("follower_id = ?", userID).Find(&follows).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取关注列表失败"})
 		return
 	}
@@ -113,9 +113,9 @@ func GetFollowing(c *gin.Context) {
 
 // GetFollowers 获取粉丝列表
 func GetFollowers(c *gin.Context) {
-	currentUser := c.MustGet("user").(models.User)
+	userID := c.GetUint("userID")
 	var follows []models.Follow
-	if err := models.DB.Preload("Follower").Where("followed_id = ?", currentUser.UserID).Find(&follows).Error; err != nil {
+	if err := models.DB.Preload("Follower").Where("followed_id = ?", userID).Find(&follows).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取粉丝列表失败"})
 		return
 	}

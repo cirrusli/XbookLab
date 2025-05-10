@@ -96,7 +96,7 @@ func main() {
 // 获取所有用户ID
 func getAllUserIDs(db *sql.DB) []uint {
 	var userIDs []uint
-	rows, err := db.Query("SELECT user_id FROM user")
+	rows, err := db.Query("SELECT user_id FROM users")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -142,7 +142,7 @@ func calculateUserRecommendations(db *sql.DB, userID uint) []Recommendation {
 			UserID:  userID,
 			BookID:  bookID,
 			Score:   score,
-			Updated: time.Now(),
+			Updated: time.Now().In(time.FixedZone("CST", 8*3600)),
 		})
 	}
 

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"xbooklab/models"
 
@@ -25,11 +26,11 @@ type GetRecommendedBooksResponse struct {
 func GetRecommendedBooks(c *gin.Context) {
 	// 解析请求参数
 	var req GetRecommendedBooksRequest
-	if err := c.ShouldBindQuery(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	log.Printf("Received request: %+v", req)
 	var recommendedBooks []models.Book
 	var algorithm string
 	var recommendationReason string
@@ -45,6 +46,12 @@ func GetRecommendedBooks(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
+		}
+		// 如果推荐书籍数量不足，用热门书籍补充
+		if len(recommendedBooks) < int(req.Limit) {
+			remaining := int(req.Limit) - len(recommendedBooks)
+			popularBooks := models.GetPopularBooks(remaining)
+			recommendedBooks = append(recommendedBooks, popularBooks...)
 		}
 		algorithm = "CollaborativeFiltering"
 		recommendationReason = "Books recommended based on user preferences"

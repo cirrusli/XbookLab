@@ -8,6 +8,33 @@ type Tag struct {
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
 
+type BookTag struct {
+	BookID uint `gorm:"not null"`
+	TagID  uint `gorm:"not null"`
+}
+
+func GetAllTags() ([]Tag, error) {
+	var tags []Tag
+	if err := DB.Find(&tags).Error; err != nil {
+		return nil, err
+	}
+	return tags, nil
+}
+
+func CreateTag(tag *Tag) error {
+	if err := DB.Create(tag).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteTag(id string) error {
+	if err := DB.Where("tag_id = ?", id).Delete(&Tag{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 // 书籍类目
 // var AllBookTags = []Tag{
 // 	{1, "小说"},

@@ -57,14 +57,15 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	{
 		auth.POST("/login", handlers.Login)
 		auth.POST("/logout", handlers.Logout)
-		auth.PUT("/change-password", middleware.AuthMiddleware(), handlers.ChangePassword)
+		auth.POST("/change-password", middleware.AuthMiddleware(), handlers.ChangePassword)
 	}
 
 	// 用户相关路由
 	user := r.Group("/api/user")
+	user.POST("/register", handlers.Register)
 	user.Use(middleware.AuthMiddleware())
 	{
-		user.POST("/register", handlers.Register)
+		// 现在只能获取自己的信息
 		user.GET("/profile", handlers.GetUserProfile)
 		user.PUT("/profile", handlers.UpdateUserProfile)
 		user.POST("/follow/:id", handlers.FollowUser)
@@ -94,37 +95,54 @@ func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
 	}
 
 	// 话题相关路由
-	topics := r.Group("/api/topics")
+	topic := r.Group("/api/topic")
 	{
-		topics.GET("/", handlers.GetTopics)
-		topics.POST("/", handlers.CreateTopic)
-		topics.GET("/:id", handlers.GetTopic)
-		topics.PUT("/:id", handlers.UpdateTopic)
-		topics.DELETE("/:id", handlers.DeleteTopic)
+		topic.GET("/", handlers.GetTopics)
+		topic.POST("/", handlers.CreateTopic)
+		topic.GET("/:id", handlers.GetTopic)
+		topic.PUT("/:id", handlers.UpdateTopic)
+		topic.DELETE("/:id", handlers.DeleteTopic)
 	}
 
 	// 评论相关路由
-	comments := r.Group("/api/comments")
-	comments.Use(middleware.AuthMiddleware())
+	comment := r.Group("/api/comment")
+	comment.Use(middleware.AuthMiddleware())
 	{
-		comments.POST("/", handlers.CreateComment)
-		comments.GET("/:targetType/:targetId", handlers.GetComments)
-		comments.DELETE("/:id", handlers.DeleteComment)
+		comment.POST("/", handlers.CreateComment)
+		comment.GET("/:targetType/:targetId", handlers.GetComments)
+		comment.DELETE("/:id", handlers.DeleteComment)
 	}
 
 	// 点赞相关路由
-	likes := r.Group("/api/likes")
-	likes.Use(middleware.AuthMiddleware())
+	like := r.Group("/api/like")
+	like.Use(middleware.AuthMiddleware())
 	{
-		likes.POST("/topic/:id", handlers.LikeTopic)
-		likes.DELETE("/topic/:id", handlers.UnlikeTopic)
+		like.POST("/topic/:id", handlers.LikeTopic)
+		like.DELETE("/topic/:id", handlers.UnlikeTopic)
 	}
 
 	// 用户动态路由
-	events := r.Group("/api/events")
-	events.Use(middleware.AuthMiddleware())
+	event := r.Group("/api/event")
+	event.Use(middleware.AuthMiddleware())
 	{
-		events.GET("/", handlers.GetUserEvents)
+		event.GET("/", handlers.GetUserEvents)
+	}
+
+	// 标签管理路由
+	tag := r.Group("/api/tag")
+	tag.Use(middleware.AuthMiddleware())
+	{
+		tag.GET("/", handlers.GetTagList)
+		tag.POST("/", handlers.AddTag)
+		tag.DELETE("/:id", handlers.DeleteTag)
+	}
+
+	// 用户管理路由
+	manager := r.Group("/api/manager")
+	manager.Use(middleware.AuthMiddleware())
+	{
+		manager.GET("/users", handlers.GetUserList)
+		manager.DELETE("/users/:id", handlers.DeleteUser)
 	}
 
 	return r

@@ -14,3 +14,12 @@ type Event struct {
 func (Event) TableName() string {
 	return "event"
 }
+
+func GetEventsByUserID(userID uint) ([]Event, error) {
+	var events []Event
+	if err := DB.Where("user_id = ?", userID).
+		Preload("User").Order("created_at DESC").Find(&events).Error; err != nil {
+		return nil, err
+	}
+	return events, nil
+}

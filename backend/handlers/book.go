@@ -1,4 +1,5 @@
 package handlers
+
 import (
 	"net/http"
 	"xbooklab/models"
@@ -7,13 +8,13 @@ import (
 )
 
 type CreateBookRequest struct {
-	BookID      uint   `json:"book_id"`
-	Title       string `json:"title"`
-	Author      string `json:"author"`
-	Cover       string `json:"cover"`
-	Description string `json:"description"`
-	Rating      string `json:"rating"`
-	TagName     string `json:"tag_name"`
+	BookID        uint    `json:"book_id"`
+	Title         string  `json:"title"`
+	Author        string  `json:"author"`
+	Cover         string  `json:"cover"`
+	Description   string  `json:"description"`
+	AverageRating float64 `json:"average_rating"`
+	TagName       string  `json:"tag_name"`
 }
 
 type CreateBookResponse struct {
@@ -52,7 +53,7 @@ type GetBookListRequest struct {
 
 type GetBookListResponse struct {
 	Books    []models.Book `json:"book_list"`
-	TotalNum uint   `json:"total_num"`
+	TotalNum uint          `json:"total_num"`
 }
 
 type DeleteBookRequest struct {
@@ -64,7 +65,6 @@ type DeleteBookResponse struct {
 	Message string `json:"message"`
 }
 
-
 func GetBookList(c *gin.Context) {
 	var books []models.Book
 	models.DB.Find(&books)
@@ -72,12 +72,48 @@ func GetBookList(c *gin.Context) {
 }
 
 func CreateBook(c *gin.Context) {
-	var book models.Book
-	if err := c.ShouldBindJSON(&book); err != nil {
+	var req CreateBookRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	models.DB.Create(&book)
+
+	// 创建书籍记录
+	book := models.Book{
+		Title:         req.Title,
+		Author:        req.Author,
+		Cover:         req.Cover,
+		Description:   req.Description,
+		AverageRating: req.AverageRating,
+	}
+	if err := models.DB.Create(&book).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建书籍失败"})
+		return
+	}
+
+	// 处理标签
+	tagName := req.TagName
+	if tagName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "标签不能为空"})
+		return
+	}
+	// 查找或创建标签
+	var tag models.Tag
+	if err := models.DB.Where("tag_name = ?", tagName).FirstOrCreate(&tag, models.Tag{TagName: tagName}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "处理标签失败"})
+		return
+	}
+
+	// 创建书籍标签关联
+	bookTag := models.BookTag{
+		BookID: book.BookID,
+		TagID:  tag.TagID,
+	}
+	if err := models.DB.Create(&bookTag).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建标签关联失败"})
+		return
+	}
+
 	c.JSON(http.StatusCreated, book)
 }
 

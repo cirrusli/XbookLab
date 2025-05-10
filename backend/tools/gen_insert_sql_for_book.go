@@ -29,7 +29,7 @@ func genBooks() {
 	}
 
 	// 封面图片链接模板
-	coverTemplate := "https://example.com/covers/%d.jpg"
+	// coverTemplate := "https://example.com/covers/%d.jpg"
 
 	var bookInserts []string
 	var tagInserts []string
@@ -46,9 +46,10 @@ func genBooks() {
 		title := fmt.Sprintf("%s书籍%d", tagName, tagCount[tagID])
 
 		author := authors[rand.Intn(len(authors))]
-		cover := fmt.Sprintf(coverTemplate, i)
+		// cover := fmt.Sprintf(coverTemplate, i)
+		cover:="D:\\Gooo\\Dev_Projects\\XbookLab\\backend\\assets\\book_cover\\default.png"
 		desc := fmt.Sprintf(descriptions[rand.Intn(len(descriptions))], tagName)
-		rating := float64(rand.Intn(101)) / 10.0 // 修改为 0.0 到 10.0 的一位小数
+		rating := float64(rand.Intn(51)+50) / 10.0 // 生成5.0到10.0的一位小数
 
 		// 构建书籍插入语句
 		bookSQL := fmt.Sprintf(

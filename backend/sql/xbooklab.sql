@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS x_book_lab_test DEFAULT CHARACTER SET utf8mb4 COLL
 
 USE x_book_lab_test;
 -- 用户表
-CREATE TABLE IF NOT EXISTS `user` (
+CREATE TABLE IF NOT EXISTS `users` (
   `user_id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `username` VARCHAR(50) UNIQUE NOT NULL,
   `password` VARCHAR(255) NOT NULL,
@@ -13,14 +13,14 @@ CREATE TABLE IF NOT EXISTS `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 标签表
-CREATE TABLE IF NOT EXISTS `tag` (
+CREATE TABLE IF NOT EXISTS `tags` (
   `tag_id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `tag_name` VARCHAR(50) UNIQUE NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 用户兴趣标签关联表
-CREATE TABLE IF NOT EXISTS `user_tag` (
+CREATE TABLE IF NOT EXISTS `user_tags` (
   `user_id` INT UNSIGNED,
   `tag_id` INT UNSIGNED,
   PRIMARY KEY (`user_id`, `tag_id`),
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `user_tag` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 书籍表
-CREATE TABLE IF NOT EXISTS `book` (
+CREATE TABLE IF NOT EXISTS `books` (
   `book_id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
   `author` VARCHAR(100),
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `book` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 书籍标签关联表
-CREATE TABLE IF NOT EXISTS `book_tag` (
+CREATE TABLE IF NOT EXISTS `book_tags` (
   `book_id` INT UNSIGNED,
   `tag_id` INT UNSIGNED,
   PRIMARY KEY (`book_id`, `tag_id`),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `book_tag` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 话题表
-CREATE TABLE IF NOT EXISTS `topic` (
+CREATE TABLE IF NOT EXISTS `topics` (
   `topic_id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
   `content` TEXT,
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `topic` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 话题标签关联表
-CREATE TABLE IF NOT EXISTS `topic_tag` (
+CREATE TABLE IF NOT EXISTS `topic_tags` (
   `topic_id` INT UNSIGNED,
   `tag_id` INT UNSIGNED,
   PRIMARY KEY (`topic_id`, `tag_id`),
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `topic_tag` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 评论表
-CREATE TABLE IF NOT EXISTS `comment` (
+CREATE TABLE IF NOT EXISTS `comments` (
   `comment_id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `target_id` INT UNSIGNED NOT NULL, -- 对应书籍/话题ID
   `type` TINYINT UNSIGNED NOT NULL, -- 0:书籍评论 1:话题评论
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `book_view` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 关注表
-CREATE TABLE IF NOT EXISTS `follow` (
+CREATE TABLE IF NOT EXISTS `follows` (
   `follower_id` INT UNSIGNED NOT NULL,
   `followed_id` INT UNSIGNED NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

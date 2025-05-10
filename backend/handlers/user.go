@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"xbooklab/models"
 
 	"github.com/gin-gonic/gin"
@@ -31,10 +32,10 @@ func Register(c *gin.Context) {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	user := models.User{
-		Username:            req.Username,
-		Password:        string(hashedPassword),
-		Avatar:              req.Avatar,
-		Bio:                 req.Bio,
+		Username: req.Username,
+		Password: string(hashedPassword),
+		Avatar:   req.Avatar,
+		Bio:      req.Bio,
 	}
 	if err := models.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "注册失败" + err.Error()})
@@ -85,4 +86,30 @@ func UpdateUserProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "用户信息更新成功"})
+}
+
+func GetUserList(c *gin.Context) {
+	users, err := models.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取用户列表失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": users})
+}
+
+func DeleteUser(c *gin.Context) {
+	id := c.Param("id")
+
+	userID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "用户 ID 格式错误"})
+		return
+	}
+	if err := models.DeleteUser(uint(userID)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除用户失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "用户删除成功"})
 }

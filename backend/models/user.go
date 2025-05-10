@@ -28,3 +28,9 @@ func UpdateUser(user *User) error {
 func DeleteUser(id uint) error {
 	return DB.Delete(&User{}, id).Error
 }
+
+func GetAllUsers() ([]User, error) {
+	var users []User
+	err := DB.Find(&users).Error
+	return users, err
+}
