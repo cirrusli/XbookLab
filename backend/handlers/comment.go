@@ -1,4 +1,5 @@
 package handlers
+
 import (
 	"net/http"
 	"strconv"
@@ -7,8 +8,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
 type CreateCommentRequest struct {
-	Comment models.Comment `json:"comment"`
+	Content  string `json:"content"`
+	TargetID uint   `json:"target_id"`
+	Type     uint   `json:"type"`
 }
 
 type CreateCommentResponse struct {
@@ -21,10 +25,6 @@ type GetCommentListRequest struct {
 	CommentType uint `json:"comment_type"`
 }
 
-type GetCommentListResponse struct {
-	Comments []models.Comment `json:"comments"`
-}
-
 type RecordCommentRequest struct {
 	UserID    uint `json:"user_id"`
 	CommentID uint `json:"comment_id"`
@@ -34,8 +34,6 @@ type RecordCommentResponse struct {
 	Code    uint   `json:"code"`
 	Message string `json:"message"`
 }
-
-
 
 // CreateComment 创建评论
 func CreateComment(c *gin.Context) {
@@ -84,11 +82,10 @@ func GetComments(c *gin.Context) {
 // DeleteComment 删除评论
 func DeleteComment(c *gin.Context) {
 	commentID, _ := strconv.Atoi(c.Param("id"))
-	userID := c.GetUint("userID")
 
 	var comment models.Comment
-	if err := models.DB.Where("comment_id = ? AND user_id = ?", commentID, userID).First(&comment).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "评论不存在或无权删除"})
+	if err := models.DB.Where("comment_id = ?", commentID).First(&comment).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "评论不存在"})
 		return
 	}
 

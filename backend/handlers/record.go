@@ -1,9 +1,12 @@
 package handlers
+
 import (
 	"net/http"
+	"xbooklab/models"
 
 	"github.com/gin-gonic/gin"
 )
+
 type RecordBookViewRequest struct {
 	UserID uint `json:"user_id"`
 	BookID uint `json:"book_id"`
@@ -26,102 +29,102 @@ type RecordBookRatingResponse struct {
 }
 
 type RecordBookCommentRequest struct {
-	UserID    uint   `json:"user_id"`
-	BookID    uint   `json:"book_id"`
-	Content   string `json:"content"`
+	UserID  uint   `json:"user_id"`
+	BookID  uint   `json:"book_id"`
+	Content string `json:"content"`
 }
 type RecordBookCommentResponse struct {
 	Code    uint   `json:"code"`
 	Message string `json:"message"`
 }
 
-
 // RecordBookView 记录用户浏览行为
 func RecordBookView(c *gin.Context) {
-	// 1. 获取用户ID和书籍ID
-	// userID := c.MustGet("userID").(uint32)
-	// bookID, err := strconv.ParseUint(c.Param("bookId"), 10, 32)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "invalid book id"})
-	// 	return
-	// }
+	var req RecordBookViewRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, RecordBookViewResponse{
+			Code:    400,
+			Message: "invalid request",
+		})
+		return
+	}
 
-	// // 2. 获取数据库连接
-	// db := c.MustGet("db").(*sql.DB)
+	if err := models.CreateBookView( req.UserID, req.BookID); err != nil {
+		c.JSON(http.StatusInternalServerError, RecordBookViewResponse{
+			Code:    500,
+			Message: "failed to record view",
+		})
+		return
+	}
 
-	// // 3. 记录浏览行为
-	// err = models.RecordBookView(context.Background(), db, userID, uint32(bookID))
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
-
-	// 4. 返回成功响应
-	c.JSON(http.StatusOK, gin.H{
-		"message": "view recorded",
+	c.JSON(http.StatusOK, RecordBookViewResponse{
+		Code:    200,
+		Message: "view recorded",
 	})
 }
 
 // RecordBookRating 记录用户评分行为
 func RecordBookRating(c *gin.Context) {
-	// 1. 获取用户ID和书籍ID
-	// userID := c.MustGet("userID").(uint32)
-	// bookID, err := strconv.ParseUint(c.Param("bookId"), 10, 32)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "invalid book id"})
-	// 	return
-	// }
+	var req RecordBookRatingRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, RecordBookRatingResponse{
+			Code:    400,
+			Message: "invalid request",
+		})
+		return
+	}
 
-	// // 2. 解析请求体
-	// var req struct {
-	// 	Rating uint32 `json:"rating"`
-	// }
-	// if err := c.ShouldBindJSON(&req); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	if req.Rating > 10 {
+		c.JSON(http.StatusBadRequest, RecordBookRatingResponse{
+			Code:    400,
+			Message: "rating must be between 0-10",
+		})
+		return
+	}
 
-	// // 3. 获取数据库连接
-	// db := c.MustGet("db").(*sql.DB)
+	if err := models.CreateOrUpdateRating(req.UserID, req.BookID, req.Rating); err != nil {
+		c.JSON(http.StatusInternalServerError, RecordBookRatingResponse{
+			Code:    500,
+			Message: "failed to record rating",
+		})
+		return
+	}
 
-	// // 4. 记录评分行为
-	// err = models.RecordBookRating(context.Background(), db, userID, uint32(bookID), req.Rating)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
-
-	// 5. 返回成功响应
-	c.JSON(http.StatusOK, gin.H{
-		"message": "rating recorded",
+	c.JSON(http.StatusOK, RecordBookRatingResponse{
+		Code:    200,
+		Message: "rating recorded",
 	})
 }
 
-// RecordBookComment 记录用户评论行为
-func RecordBookComment(c *gin.Context) {
-	// // 1. 获取用户ID
-	// userID := c.MustGet("userID").(uint32)
+// RecordBookComment 记录用户评论行为，似乎有评论表就好，不需要这个接口
+// func RecordBookComment(c *gin.Context) {
+// 	var req RecordBookCommentRequest
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		c.JSON(http.StatusBadRequest, RecordBookCommentResponse{
+// 			Code:    400,
+// 			Message: "invalid request",
+// 		})
+// 		return
+// 	}
 
-	// // 2. 解析请求体
-	// var req models.RecordCommentReq
-	// if err := c.ShouldBindJSON(&req); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
-	// req.UserID = userID
+// 	if len(req.Content) == 0 {
+// 		c.JSON(http.StatusBadRequest, RecordBookCommentResponse{
+// 			Code:    400,
+// 			Message: "comment content cannot be empty",
+// 		})
+// 		return
+// 	}
 
-	// // 3. 获取数据库连接
-	// db := c.MustGet("db").(*sql.DB)
+// 	if err := models.CreateComment(db, req.UserID, req.BookID, req.Content); err != nil {
+// 		c.JSON(http.StatusInternalServerError, RecordBookCommentResponse{
+// 			Code:    500,
+// 			Message: "failed to record comment",
+// 		})
+// 		return
+// 	}
 
-	// // 4. 记录评论行为
-	// err := models.RecordBookComment(context.Background(), db, req)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
-
-	// 5. 返回成功响应
-	c.JSON(http.StatusOK, gin.H{
-		"message": "comment recorded",
-	})
-}
+// 	c.JSON(http.StatusOK, RecordBookCommentResponse{
+// 		Code:    200,
+// 		Message: "comment recorded",
+// 	})
+// }
