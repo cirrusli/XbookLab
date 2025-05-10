@@ -9,10 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
 type GetTopicListRequest struct {
-	Offset     uint `json:"offset"`
-	Limit      uint `json:"limit"`
-	TagFilter  uint `json:"tag_filter"`
+	Offset    uint `json:"offset"`
+	Limit     uint `json:"limit"`
+	TagFilter uint `json:"tag_filter"`
 }
 
 type GetTopicListResponse struct {
@@ -21,15 +22,15 @@ type GetTopicListResponse struct {
 }
 
 type CreateTopicRequest struct {
-	Title         string `json:"title"`
-	Content       string `json:"content"`
+	Title        string `json:"title"`
+	Content      string `json:"content"`
 	AuthorUserID uint   `json:"author_user_id"`
 }
 
 type CreateTopicResponse struct {
-	TopicID   uint   `json:"topic_id"`
-	Code      uint   `json:"code"`
-	Message   string `json:"message"`
+	TopicID uint   `json:"topic_id"`
+	Code    uint   `json:"code"`
+	Message string `json:"message"`
 }
 
 type GetTopicDetailRequest struct {
@@ -68,7 +69,6 @@ type Topic struct {
 	TagName      string `json:"tag_name"`
 }
 
-
 // 创建话题
 func CreateTopic(c *gin.Context) {
 	var topic models.Topic
@@ -82,8 +82,7 @@ func CreateTopic(c *gin.Context) {
 	// 	return
 	// }
 
-	db := models.GetDB()
-	if err := db.Create(&topic).Error; err != nil {
+	if err := models.DB.Create(&topic).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建话题失败"})
 		return
 	}
@@ -94,9 +93,8 @@ func CreateTopic(c *gin.Context) {
 // 获取话题列表
 func GetTopics(c *gin.Context) {
 	var topics []models.Topic
-	db := models.GetDB()
 
-	if err := db.Find(&topics).Error; err != nil {
+	if err := models.DB.Find(&topics).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取话题列表失败"})
 		return
 	}
@@ -113,9 +111,8 @@ func GetTopic(c *gin.Context) {
 	}
 
 	var topic models.Topic
-	db := models.GetDB()
 
-	if err := db.First(&topic, id).Error; err != nil {
+	if err := models.DB.First(&topic, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "话题不存在"})
 		} else {
@@ -152,9 +149,8 @@ func UpdateTopic(c *gin.Context) {
 	// }
 
 	// topic.ID = uint(id)
-	db := models.GetDB()
 
-	if err := db.Save(&topic).Error; err != nil {
+	if err := models.DB.Save(&topic).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新话题失败"})
 		return
 	}
@@ -170,9 +166,7 @@ func DeleteTopic(c *gin.Context) {
 		return
 	}
 
-	db := models.GetDB()
-
-	if err := db.Delete(&models.Topic{}, id).Error; err != nil {
+	if err := models.DB.Delete(&models.Topic{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除话题失败"})
 		return
 	}

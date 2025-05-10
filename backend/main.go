@@ -39,16 +39,15 @@ func initRedis() *redis.Client {
 
 func main() {
 	db := initMySQL()
-	models.SetDB(db)
-
 	rdb := initRedis()
+	models.SetDB(db, rdb)
 
-	r := InitRouter(db, rdb)
+	r := InitRouter()
 	if err := r.Run(":8000"); err != nil {
 		log.Fatal("服务启动失败:", err)
 	}
 }
-func InitRouter(db *gorm.DB, rdb *redis.Client) *gin.Engine {
+func InitRouter() *gin.Engine {
 	r := gin.Default()
 	r.Use(gin.Logger(), gin.Recovery())
 
