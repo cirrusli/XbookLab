@@ -43,23 +43,11 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetUint("userID")
-	comment.UserID = userID
-
-	if err := models.DB.Create(&comment).Error; err != nil {
+	comment.UserID = c.GetUint("userID")
+	if err := models.CreateComment(&comment); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建评论失败"})
 		return
 	}
-
-	// 记录用户动态
-	event := models.Event{
-		UserID:       userID,
-		EventType:    1, // 评论
-		EventContent: "发表了评论",
-		TargetID:     comment.TargetID,
-		TargetType:   comment.Type,
-	}
-	models.DB.Create(&event)
 
 	c.JSON(http.StatusOK, comment)
 }
@@ -69,9 +57,8 @@ func GetComments(c *gin.Context) {
 	targetType, _ := strconv.Atoi(c.Param("targetType"))
 	targetID, _ := strconv.Atoi(c.Param("targetId"))
 
-	var comments []models.Comment
-	if err := models.DB.Where("target_id = ? AND type = ?", targetID, targetType).
-		Preload("User").Order("created_at DESC").Find(&comments).Error; err != nil {
+	comments, err := models.GetComments(uint(targetID), uint(targetType))
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取评论失败"})
 		return
 	}
@@ -83,13 +70,7 @@ func GetComments(c *gin.Context) {
 func DeleteComment(c *gin.Context) {
 	commentID, _ := strconv.Atoi(c.Param("id"))
 
-	var comment models.Comment
-	if err := models.DB.Where("comment_id = ?", commentID).First(&comment).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "评论不存在"})
-		return
-	}
-
-	if err := models.DB.Delete(&comment).Error; err != nil {
+	if err := models.DeleteComment(uint(commentID)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除评论失败"})
 		return
 	}
