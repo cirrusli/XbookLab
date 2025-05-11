@@ -1,0 +1,80 @@
+.sidebar {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--card-shadow);
+}
+/* 新增侧边栏样式 */
+.sidebar-section {
+  margin-bottom: 24px;
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  &::after {
+    content: '▼';
+    font-size: 12px;
+    transition: transform 0.3s ease;
+  }
+}
+
+.tag-cloud {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag {
+  display: block;
+  padding: 8px 12px;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  &:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  &.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+}
+
+.btn-default {
+  color: white;
+  border: 1px solid var(--border-color);
+  background: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  .sm {
+    padding: 0 20px;
+  }
+  /* 设置最小宽度 */
+  &:hover {
+    background-color: var(--bg-color);
+  }
+}
+
+.section-box {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--card-shadow);
+}
