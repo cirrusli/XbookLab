@@ -31,7 +31,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "${resolve(__dirname, 'src/style/common.scss')}";`
+        // additionalData: `@import "${resolve(__dirname, 'src/style/common.scss')}";`
       }
     }
   },
