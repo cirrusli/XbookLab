@@ -71,6 +71,7 @@ func GetComments(c *gin.Context) {
 			},
 			"message": "all in one",
 		})
+		return
 	}
 	comments, err := models.GetComments(uint(targetID), uint(targetType))
 	if err != nil {

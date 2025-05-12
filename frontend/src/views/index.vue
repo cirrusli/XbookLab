@@ -14,9 +14,9 @@
         >
       </div>
     </div>
-    <div class="sidebar-section">
+    <!-- <div class="sidebar-section">
       <button class="settings-btn">个性化设置</button>
-    </div>
+    </div> -->
   </aside>
 
   <!-- Right Content -->
@@ -182,7 +182,7 @@ const goToTopicDetail = (topicId) => {
 .tag-cloud {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 16px;
 }
 
 .tag {
@@ -249,7 +249,8 @@ const goToTopicDetail = (topicId) => {
 .topic-card {
   background: white;
   border-radius: 8px;
-  padding: 16px;
+  padding: 28px;
+  padding-top: 6px;
   box-shadow: var(--card-shadow);
   transition: var(--transition);
   cursor: pointer;

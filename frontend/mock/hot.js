@@ -17,7 +17,7 @@ const { data } = Mock.mock({
         },
         'comments|10-100': 1,
         // category: '@pick(["literature","technology","history","psychology","art","business","philosophy"])',
-        tag: '@pick(["文学","科技","历史","心理学","艺术","商业","哲学"])',
+        tag: '@pick(["文学","科技","历史","心理","艺术","商业","哲学"])',
         date: () => dayjs()
             .subtract(Math.floor(Math.random() * 90), 'day') // 生成最近90天的数据
             .format('YYYY-MM-DD'),

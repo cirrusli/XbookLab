@@ -1,26 +1,28 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
+	"strconv"
 	"xbooklab/models"
 
 	"github.com/gin-gonic/gin"
 )
 
 type RecordBookViewRequest struct {
-	UserID uint `json:"user_id"`
-	BookID uint `json:"book_id"`
+	// UserID uint `json:"user_id"`
+	BookID string `json:"book_id"`
 }
 
 type RecordBookViewResponse struct {
 	Code    uint   `json:"code"`
+	Data    string `json:"data"`
 	Message string `json:"message"`
 }
 
 type RecordBookRatingRequest struct {
-	UserID uint `json:"user_id"`
-	BookID uint `json:"book_id"`
-	Rating uint `json:"rating"`
+	BookID string `json:"book_id"`
+	Rating uint   `json:"rating"`
 }
 
 type RecordBookRatingResponse struct {
@@ -48,8 +50,19 @@ func RecordBookView(c *gin.Context) {
 		})
 		return
 	}
-
-	if err := models.CreateBookView( req.UserID, req.BookID); err != nil {
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		userID = 1
+	}
+	bookID, err := strconv.Atoi(req.BookID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, RecordBookViewResponse{
+			Code:    400,
+			Message: "invalid book id",
+		})
+		return
+	}
+	if err := models.CreateBookView(userID, uint(bookID)); err != nil {
 		c.JSON(http.StatusInternalServerError, RecordBookViewResponse{
 			Code:    500,
 			Message: "failed to record view",
@@ -59,6 +72,7 @@ func RecordBookView(c *gin.Context) {
 
 	c.JSON(http.StatusOK, RecordBookViewResponse{
 		Code:    200,
+		Data:    "",
 		Message: "view recorded",
 	})
 }
@@ -73,16 +87,20 @@ func RecordBookRating(c *gin.Context) {
 		})
 		return
 	}
-
-	if req.Rating > 10 {
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		userID = 1
+	}
+	log.Println(req.Rating)
+	req.Rating = req.Rating * 2 // 前端传过来的是0-5，这里转换为0-10
+	bookID, err := strconv.Atoi(req.BookID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, RecordBookRatingResponse{
 			Code:    400,
-			Message: "rating must be between 0-10",
+			Message: "invalid book id",
 		})
-		return
 	}
-
-	if err := models.CreateOrUpdateRating(req.UserID, req.BookID, req.Rating); err != nil {
+	if err := models.CreateOrUpdateRating(userID, uint(bookID), req.Rating); err != nil {
 		c.JSON(http.StatusInternalServerError, RecordBookRatingResponse{
 			Code:    500,
 			Message: "failed to record rating",

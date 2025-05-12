@@ -82,7 +82,7 @@
 
 <script setup>
 import { reactive, ref } from 'vue';
-import { GetHotTopicListApi, CreateTopicApi } from '@/api/hot.js';
+import { GetHotTopicListApi, CreateTopicApi, GetIndexHotTopicApi } from '@/api/hot.js';
 import { GetManageTagListApi } from '@/api/tag.js';
 import { CreateSuccessMessage, CreateErrorMessage } from '@/utils/alert.js';
 import { useRouter } from 'vue-router';
@@ -113,7 +113,8 @@ const handleGetHotTopic = async () => {
   let params = {
     range: curDateRange.value,
   };
-  const { data } = await GetHotTopicListApi(params);
+  // const { data } = await GetHotTopicListApi(params);
+  const { data } = await GetIndexHotTopicApi(params);
   hotTopicList.value = data;
 };
 

@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"xbooklab/models"
 
@@ -61,12 +63,18 @@ type DeleteTopicResponse struct {
 }
 
 type Topic struct {
-	TopicID      uint   `json:"topic_id"`
-	Title        string `json:"title"`
-	Content      string `json:"content"`
-	AuthorUserID uint   `json:"author_user_id"`
-	LikeCount    uint   `json:"like_count"`
-	TagName      string `json:"tag_name"`
+	TopicID      uint      `json:"topic_id"`
+	Title        string    `json:"title"`
+	Content      string    `json:"content"`
+	Author       string    `json:"author"`
+	AuthorUserID uint      `json:"author_user_id"`
+	Views        uint      `json:"views"`
+	LikeCount    uint      `json:"like_count"`
+	Comments     uint      `json:"comments"`
+	TagName      string    `json:"tag_name"`
+	CreatedAt    time.Time `json:"created_at"`
+	Date         string    `json:"date"`
+	Timestamp    int64     `json:"timestamp"`
 }
 
 // 创建话题
@@ -99,7 +107,7 @@ func GetTopics(c *gin.Context) {
 		return
 	}
 
-	// 查询每个话题的标签名称
+	// 查询每个话题的标签名称和其他信息
 	for i := range topics {
 		var tag models.Tag
 		if err := models.DB.Table("topic_tag").
@@ -109,6 +117,11 @@ func GetTopics(c *gin.Context) {
 			First(&tag).Error; err == nil {
 			topics[i].TagName = tag.TagName
 		}
+		topics[i].Date = topics[i].CreatedAt.Format("2006-01-02 15:04:05")
+		topics[i].Timestamp = topics[i].CreatedAt.Unix()
+		topics[i].Views = uint(1000 + rand.Intn(9001)) // 随机1000-10000之间的浏览量
+		topics[i].Comments = uint(10 + rand.Intn(91))  // 随机10-100之间的评论数
+		topics[i].Author = "书友圈圈友"
 	}
 
 	c.JSON(http.StatusOK, gin.H{

@@ -1,13 +1,15 @@
-package handlers
+package models
 
 import (
-	"net/http"
+	"math/rand"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetGroups(c *gin.Context) {
-	allGroups := []gin.H{
+func GetAllGroups() []gin.H {
+	return []gin.H{
 		{
 			"id":      1,
 			"title":   "深度阅读俱乐部",
@@ -69,27 +71,25 @@ func GetGroups(c *gin.Context) {
 			"tag":     "商业",
 		},
 	}
+}
 
-	// 如果有tag查询参数，则进行过滤
-	if tag := c.Query("tag"); tag != "" {
-		filteredGroups := make([]gin.H, 0)
-		for _, group := range allGroups {
-			if group["tagVal"] == tag {
-				filteredGroups = append(filteredGroups, group)
-			}
+func GetAllFriendsBooks() []gin.H {
+	count := rand.Intn(11) + 10 // 生成10-20之间的随机数
+
+	books := make([]gin.H, count)
+	for i := 0; i < count; i++ {
+		books[i] = gin.H{
+			"id":           i + 1,
+			"name":         "用户" + strconv.Itoa(i+1),
+			"avatar":       "https://picsum.photos/100/100?random=" + strconv.Itoa(i),
+			"reading":      "正在阅读",
+			"bookTitle":    "书籍" + strconv.Itoa(i+1),
+			"bookCover":    "https://picsum.photos/150/200?random=" + strconv.Itoa(i),
+			"bookProgress": rand.Intn(100) + 1,
+			"bookComment":  "这是一本很好的书",
+			"lastActive":   time.Now().Format("2006-01-02 15:04"),
+			"type":         strconv.Itoa(rand.Intn(2) + 1), // 1或2
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"code":    200,
-			"data":    filteredGroups,
-			"message": "获取小组列表成功",
-		})
-		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    200,
-		"data":    allGroups,
-		"message": "获取小组列表成功",
-	})
-
+	return books
 }

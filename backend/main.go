@@ -64,13 +64,14 @@ func InitRouter() *gin.Engine {
 	// 推荐书籍路由
 	r.GET("/api/recommend", handlers.GetRecommendedBooks)
 	r.GET("/api/getGroups", handlers.GetGroups)
+	r.GET("/api/getFriendsBook", handlers.GetFriendsBooks)
 
 	// 用户行为路由
 	record := r.Group("/api/record")
 	record.Use(middleware.AuthMiddleware())
 	{
-		record.POST("/view/:bookId", handlers.RecordBookView)
-		record.POST("/rate/:bookId", handlers.RecordBookRating)
+		record.POST("/view", handlers.RecordBookView)
+		record.POST("/rating", handlers.RecordBookRating)
 	}
 
 	// 话题相关路由

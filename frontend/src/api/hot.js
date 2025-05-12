@@ -9,7 +9,12 @@ export function GetIndexHotTopicApi(params) {
                 title: item.title,
                 excerpt: item.content,
                 likes: item.like_count,
-                tag: item.tag_name
+                tag: item.tag_name,
+                views: item.views,
+                comments: item.comments,
+                author: item.author,
+                date: item.date,
+                timestamp: item.timestamp,
             }))
         };
     });
@@ -22,7 +27,7 @@ export function GetHotTopicListApi(params) {
 
 // 获取话题详情
 export function GetTopicDetailApi(id) {
-    return get(`/api/getTopicDetail/${id}`);
+    return get(`/api/topic/${id}`);
 }
 
 // 点赞话题

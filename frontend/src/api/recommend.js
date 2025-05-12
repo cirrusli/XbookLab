@@ -7,12 +7,12 @@ export function GetRecommendedBooksApi(params) {
     return get('/api/recommend', params);
 }
 export function GetBookDetailApi(id) {
-    return get(`/api/getBookDetail/${id}`);
+    return get(`/api/book/${id}`);
 }
 
 // 登录状态下调用，记录阅读该书籍行为
 export function RecordBookViewApi(params) {
-    return post('/api/recordBookView', params)
+    return post('/api/record/view', params)
 }
 
 export function GetBookCommentsApi(params) {
@@ -21,12 +21,12 @@ export function GetBookCommentsApi(params) {
 
 // 记录用户评论
 export function RecordBookCommentApi(params) {
-    return post("/api/recordBookComment", params)
+    return post("/api/comment", params)
 }
 
 // 记录用户评分
 export function RecordBookRatingApi(params) {
-    return post('/api/recordBookRating', params)
+    return post('/api/record/rating', params)
 }
 
 // 后台接口
