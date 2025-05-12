@@ -80,7 +80,7 @@ const menus = ref([
   { id: 1, name: '文学', value: 'literature' },
   { id: 2, name: '科技', value: 'technology' },
   { id: 3, name: '历史', value: 'history' },
-  { id: 4, name: '心理学', value: 'psychology' },
+  { id: 4, name: '心理', value: 'psychology' },
   { id: 5, name: '艺术', value: 'art' },
   { id: 6, name: '商业', value: 'business' },
   { id: 7, name: '哲学', value: 'philosophy' },

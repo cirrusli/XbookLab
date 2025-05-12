@@ -51,8 +51,8 @@ if (isLogin.value) {
 const curPath = ref(route.path);
 const menuItems = [
   { name: '推荐', path: '/index' },
-  { name: '兴趣小组', path: '/groups' },
-  { name: '热榜', path: '/hot' },
+  { name: '书友圈', path: '/groups' },
+  { name: '话题热榜', path: '/hot' },
   { name: '好友在读', path: '/friends' },
   // { name: '书友匹配', path: '#', id: 'match-trigger' },
 ];

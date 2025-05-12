@@ -60,7 +60,7 @@ func Login(c *gin.Context) {
 		"data": gin.H{
 			"token":  tokenString,
 			"name":   user.Username,
-			"avatar": "http://localhost:8000/static/book_cover/san_ti.jpg",
+			"avatar": "http://localhost:8000/static/user_avatar/wechat.png",
 			"roles":  []string{"admin"},
 		},
 		"message": "登录成功",
@@ -70,8 +70,8 @@ func Login(c *gin.Context) {
 func Logout(c *gin.Context) {
 	// 前端需要自行删除本地存储的token
 	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"data": "",
+		"code":    200,
+		"data":    "",
 		"message": "登出成功",
 	})
 }

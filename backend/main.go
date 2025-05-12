@@ -63,6 +63,7 @@ func InitRouter() *gin.Engine {
 
 	// 推荐书籍路由
 	r.GET("/api/recommend", handlers.GetRecommendedBooks)
+	r.GET("/api/getGroups", handlers.GetGroups)
 
 	// 用户行为路由
 	record := r.Group("/api/record")

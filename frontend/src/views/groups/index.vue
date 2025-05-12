@@ -1,7 +1,7 @@
 <template>
   <aside class="sidebar">
     <div class="sidebar-section">
-      <h3 class="sidebar-title">小组分类</h3>
+      <h3 class="sidebar-title">圈子分类</h3>
       <div class="tag-cloud">
         <span
           v-for="(item, index) in menus"
@@ -17,7 +17,7 @@
 
   <div class="content">
     <section class="content-section">
-      <h2 class="section-title">热门小组</h2>
+      <h2 class="section-title">热门书友圈</h2>
       <div class="groups-container" id="groups-container">
         <div v-for="(item, index) in groupList" :key="index" class="group-card">
           <img :src="item.cover" :alt="item.title" class="group-cover" />
@@ -44,7 +44,7 @@ const menus = ref([
   { id: 1, tag: '文学', tagVal: 'literature' },
   { id: 2, tag: '科技', tagVal: 'technology' },
   { id: 3, tag: '历史', tagVal: 'history' },
-  { id: 4, tag: '心理学', tagVal: 'psychology' },
+  { id: 4, tag: '心理', tagVal: 'psychology' },
   { id: 5, tag: '艺术', tagVal: 'art' },
   { id: 6, tag: '商业', tagVal: 'business' },
   { id: 7, tag: '哲学', tagVal: 'philosophy' },
