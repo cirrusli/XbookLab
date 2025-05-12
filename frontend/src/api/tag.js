@@ -1,7 +1,7 @@
 import { get, post } from "@/utils/axios"
 
 export function GetManageTagListApi() {
-    return get("/api/manage/getTagList")
+    return get("/api/tag/")
 }
 
 export function CreateTagApi(params) {

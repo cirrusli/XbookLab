@@ -4,7 +4,7 @@
       <h3>最近在读</h3>
       <div class="reading-book">
         <img
-          src="https://img9.doubanio.com/view/subject/s/public/s2768378.jpg"
+          src="http://localhost:8000/static/book_cover/san_ti.jpg"
           alt="三体"
           class="book-cover"
         />

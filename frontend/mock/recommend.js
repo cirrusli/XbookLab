@@ -17,7 +17,7 @@ const { data } = Mock.mock({
 
 export default [
     {
-        url: '/api/getBooks',
+        url: '/api/recommend',
         method: 'get',
         response: ({ query }) => {
 

@@ -2,7 +2,17 @@ import { get, post } from '@/utils/axios';
 
 // 获取首页热门话题
 export function GetIndexHotTopicApi(params) {
-    return get('/api/getIndexHotTopic', params);
+    return get('/api/topic/', params).then(res => {
+        return {
+            data: res.data.map(item => ({
+                id: item.topic_id,
+                title: item.title,
+                excerpt: item.content,
+                likes: item.like_count,
+                tag: item.tag_name
+            }))
+        };
+    });
 }
 
 // 获取热门榜单

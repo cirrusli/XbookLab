@@ -92,14 +92,30 @@ func CreateTopic(c *gin.Context) {
 
 // 获取话题列表
 func GetTopics(c *gin.Context) {
-	var topics []models.Topic
+	var topics []Topic
 
 	if err := models.DB.Find(&topics).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取话题列表失败"})
 		return
 	}
 
-	c.JSON(http.StatusOK, topics)
+	// 查询每个话题的标签名称
+	for i := range topics {
+		var tag models.Tag
+		if err := models.DB.Table("topic_tag").
+			Select("tags.tag_name").
+			Joins("join tags on topic_tag.tag_id = tags.tag_id").
+			Where("topic_tag.topic_id = ?", topics[i].TopicID).
+			First(&tag).Error; err == nil {
+			topics[i].TagName = tag.TagName
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"data":    topics,
+		"message": "获取成功",
+	})
 }
 
 // 获取单个话题

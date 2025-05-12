@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"xbooklab/models"
 
@@ -13,7 +14,19 @@ func GetTagList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取标签列表失败"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"tags": tags})
+
+	// 转换数据结构以匹配前端格式
+	var formattedTags []map[string]interface{}
+	for _, tag := range tags {
+		formattedTags = append(formattedTags, map[string]interface{}{
+			"id":       tag.TagID,
+			"tag_name": tag.TagName,
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":  200,
+		"data":  formattedTags,
+		"total": len(formattedTags)})
 }
 
 func AddTag(c *gin.Context) {
@@ -22,7 +35,7 @@ func AddTag(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	log.Printf("Received tag: %+v", tag)
 	if err := models.CreateTag(&tag); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "标签添加失败"})
 		return

@@ -4,10 +4,13 @@ import { CreateErrorMessage } from "./alert";
 
 // 创建 axios 实例
 const service = axios.create({
-    baseURL: '/',
+    // baseURL: '/', mock
+    baseURL: 'http://localhost:8000',
     timeout: 50000,
-    // headers: { "Content-Type": "application/;charset=utf-8" },
-    // headers: { "Content-Type": "multipart/form-data;charset=utf-8" },
+    headers: { 
+        "Content-Type": "application/json;charset=utf-8",
+        "Accept": "application/json"
+    },
 });
 
 // 请求拦截器

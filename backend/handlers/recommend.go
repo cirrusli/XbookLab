@@ -24,23 +24,20 @@ type GetRecommendedBooksResponse struct {
 // GetRecommendedBooks 实现书籍推荐逻辑
 // 首页推荐tab，要考虑未登录状态也可以访问热门书籍，登录态则可以拿到推荐书籍
 func GetRecommendedBooks(c *gin.Context) {
-	// 解析请求参数
+	// 解析URL查询参数
 	var req GetRecommendedBooksRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("Received request: %+v", req)
+	log.Printf("Received query params: %+v", req)
 	var recommendedBooks []models.Book
-	var algorithm string
-	var recommendationReason string
+
 	var err error
 
 	if req.UserID == 0 {
 		// 未登录
 		recommendedBooks = models.GetPopularBooks(int(req.Limit))
-		algorithm = "PopularityBased"
-		recommendationReason = "Popular books for new users"
 	} else {
 		recommendedBooks, err = models.GetRecommendedBooks(req.UserID, int(req.Limit), int(req.Offset), int(req.TagFilter))
 		if err != nil {
@@ -53,14 +50,14 @@ func GetRecommendedBooks(c *gin.Context) {
 			popularBooks := models.GetPopularBooks(remaining)
 			recommendedBooks = append(recommendedBooks, popularBooks...)
 		}
-		algorithm = "CollaborativeFiltering"
-		recommendationReason = "Books recommended based on user preferences"
 	}
 
-	response := GetRecommendedBooksResponse{
-		Books:                recommendedBooks,
-		Algorithm:            algorithm,
-		RecommendationReason: recommendationReason,
+	response := gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"Books": recommendedBooks,
+		},
 	}
 	c.JSON(http.StatusOK, response)
 }

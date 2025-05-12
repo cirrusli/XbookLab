@@ -28,12 +28,12 @@
         </div> -->
         <form id="login-form">
           <div class="form-group">
-            <label for="email" class="form-label">电子邮箱</label>
+            <label for="email" class="form-label">用户名</label>
             <input
               type="email"
-              v-model="formData.email"
+              v-model="formData.username"
               class="form-input"
-              placeholder="请输入您的邮箱"
+              placeholder="请输入用户名"
             />
           </div>
           <div class="form-group">
@@ -72,20 +72,20 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const formData = reactive({
-  email: 'admin@gmail.com',
+  username: 'test051002',
   password: '123456',
 });
 
 const validateForm = () => {
-  const { email, password } = formData;
+  const { username: email, password } = formData;
   if (!email) {
-    CreateErrorMessage('请输入邮箱');
+    CreateErrorMessage('请输入用户名');
     return false;
   }
-  if (!checkEmail(email)) {
-    CreateErrorMessage('请输入有效的邮箱地址');
-    return false;
-  }
+  // if (!checkEmail(email)) {
+  //   CreateErrorMessage('请输入有效的邮箱地址');
+  //   return false;
+  // }
   if (!password) {
     CreateErrorMessage('请输入密码');
     return false;

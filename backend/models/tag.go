@@ -4,7 +4,7 @@ import "time"
 
 type Tag struct {
 	TagID     uint      `gorm:"primaryKey;autoIncrement"`
-	TagName   string    `gorm:"size:50;not null;unique"`
+	TagName   string    `gorm:"size:50;not null;unique" json:"tag_name"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
 

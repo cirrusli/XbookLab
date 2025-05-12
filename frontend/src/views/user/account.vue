@@ -1,11 +1,11 @@
 <template>
   <div class="form-group-wrap">
-    <div class="form-group">
+    <!-- <div class="form-group">
       <label for="" class="label">账号：</label>
       <input type="text" v-model="formData.email" class="form-input" readonly />
-    </div>
+    </div> -->
     <div class="form-group">
-      <label for="" class="label">昵称：</label>
+      <label for="" class="label">用户名：</label>
       <input
         type="text"
         v-model="formData.name"

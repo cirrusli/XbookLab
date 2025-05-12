@@ -71,6 +71,7 @@ import { ref } from 'vue';
 import { GetIndexHotTopicApi } from '@/api/hot.js';
 import { GetBooksListApi } from '@/api/recommend.js';
 import { useRouter } from 'vue-router';
+import { GetRecommendedBooksApi } from '@/api/recommend.js';
 
 const router = useRouter();
 
@@ -115,8 +116,25 @@ const handleGetBookList = async () => {
   const { data } = await GetBooksListApi(params);
   bookList.value = data;
 };
-handleGetBookList();
-
+// 获取推荐书单
+const handleGetRecommendBookList = async () => {
+  let params = {
+    Limit: 10,
+    Offset: 0,
+    TagFilter: curMenuVal.value || 0
+  };
+  const { data } = await GetRecommendedBooksApi(params);
+  bookList.value = data.Books.map(book => ({
+    id: book.BookID,
+    title: book.Title,
+    author: book.Author,
+    cover: book.Cover,
+    rating: book.AverageRating,
+    desc: book.Description,
+    tag: book.Category
+  }));
+};
+handleGetRecommendBookList();
 // 跳转书籍详情
 const goToBookDetail = (bookId) => {
   router.push({ path: `/book/${bookId}` });
@@ -252,7 +270,8 @@ const goToTopicDetail = (topicId) => {
   font-size: 14px;
   margin-bottom: 12px;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+-webkit-line-clamp: 3;
+line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -330,6 +349,7 @@ const goToTopicDetail = (topicId) => {
   color: var(--text-light);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

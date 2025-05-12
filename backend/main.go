@@ -26,6 +26,8 @@ func main() {
 
 func InitRouter() *gin.Engine {
 	r := gin.Default()
+	r.Static("/static", "./assets")
+	r.Use(middleware.CorsMiddleware())
 
 	// 认证相关路由
 	auth := r.Group("/api/auth")
@@ -38,11 +40,11 @@ func InitRouter() *gin.Engine {
 	// 用户相关路由
 	user := r.Group("/api/user")
 	user.POST("/register", handlers.Register)
-	user.Use(middleware.AuthMiddleware())
+	// user.Use(middleware.AuthMiddleware())
 	{
 		// 现在只能获取自己的信息
-		user.GET("/profile", handlers.GetUserProfile)
-		user.PUT("/profile", handlers.UpdateUserProfile)
+		user.POST("/profile", handlers.GetUserProfile)
+		user.POST("/update", handlers.UpdateUserProfile)
 		user.POST("/follow/:id", handlers.FollowUser)
 		user.DELETE("/follow/:id", handlers.UnfollowUser)
 		user.GET("/following", handlers.GetFollowing)
@@ -56,6 +58,7 @@ func InitRouter() *gin.Engine {
 		book.POST("/", handlers.CreateBook)
 		book.GET("/:id", handlers.GetBookDetail)
 		book.DELETE("/:id", handlers.DeleteBook)
+		book.GET("/comments",handlers.GetComments)
 	}
 
 	// 推荐书籍路由

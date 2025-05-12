@@ -56,17 +56,24 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": tokenString,
-		"user": gin.H{
-			"id":       user.UserID,
-			"username": user.Username,
+		"code": 200,
+		"data": gin.H{
+			"token":  tokenString,
+			"name":   user.Username,
+			"avatar": "http://localhost:8000/static/book_cover/san_ti.jpg",
+			"roles":  []string{"admin"},
 		},
+		"message": "登录成功",
 	})
 }
 
 func Logout(c *gin.Context) {
 	// 前端需要自行删除本地存储的token
-	c.JSON(http.StatusOK, gin.H{"message": "登出成功"})
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": "",
+		"message": "登出成功",
+	})
 }
 
 func ChangePassword(c *gin.Context) {

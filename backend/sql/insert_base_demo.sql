@@ -1,9 +1,9 @@
 -- 插入标签
-INSERT INTO tag (tag_name) VALUES 
-('科技'), ('历史'), ('心理'), ('艺术'), ('哲学');
+INSERT INTO tags (tag_name) VALUES 
+('科技'), ('历史'), ('心理'), ('艺术'), ('哲学'), ('商业'), ('文学');
 
 -- 插入用户, 密码为123456
-INSERT INTO user (username, password, avatar, bio) VALUES
+INSERT INTO users (username, password, avatar, bio) VALUES
 ('ai_thinker', '$10$2uOLR.hS4Vtb1wUfhOyDYuabYSMu9ACVkz0T4aNjSTaw0OAQREsMW', 'https://randomuser.me/api/portraits/women/32.jpg', '热爱科幻小说与哲学思考'),
 ('history_man', '$10$2uOLR.hS4Vtb1wUfhOyDYuabYSMu9ACVkz0T4aNjSTaw0OAQREsMW', 'https://randomuser.me/api/portraits/men/33.jpg', '历史爱好者，喜欢读传记'),
 ('psychology_girl', '$10$2uOLR.hS4Vtb1wUfhOyDYuabYSMu9ACVkz0T4aNjSTaw0OAQREsMW', 'https://randomuser.me/api/portraits/women/34.jpg', '心理学研究生，研究行为模式'),
@@ -13,8 +13,8 @@ INSERT INTO user (username, password, avatar, bio) VALUES
 -- 用户兴趣标签关联数据
 INSERT INTO user_tag (user_id, tag_id)
 SELECT u.user_id, t.tag_id
-FROM user u
-CROSS JOIN tag t
+FROM users u
+CROSS JOIN tags t
 WHERE
     (u.username = 'ai_thinker' AND t.tag_name IN ('科技', '哲学')) OR
     (u.username = 'history_man' AND t.tag_name IN ('历史', '艺术')) OR
@@ -23,7 +23,7 @@ WHERE
     (u.username = 'elon-musk' AND t.tag_name = '科技');
 
 -- 插入书籍
-INSERT INTO book (title, author, cover, description,average_rating) VALUES
+INSERT INTO books (title, author, cover, description,average_rating) VALUES
 ('三体', '刘慈欣', 'https://img9.doubanio.com/view/subject/s/public/s2768378.jpg', '中国科幻文学的里程碑之作，讲述地球文明与三体文明的接触与冲突。', 9.0),
 ('人类简史', '尤瓦尔·赫拉利', 'https://img9.doubanio.com/view/subject/s/public/s27814883.jpg', '从动物到上帝的历史叙事，从认知革命到科学革命，重新审视人类历史的发展脉络。', 8.5),
 ('百年孤独', '加西亚·马尔克斯', 'https://img9.doubanio.com/view/subject/s/public/s6384944.jpg', '魔幻现实主义文学的代表作，讲述布恩迪亚家族七代人的传奇故事。', 8.0),
@@ -38,10 +38,10 @@ INSERT INTO book (title, author, cover, description,average_rating) VALUES
 ('未来简史', '尤瓦尔·赫拉利', 'https://img9.doubanio.com/view/subject/s/public/s29287103.jpg', '探讨人类未来可能面临的重大变革与挑战。',7.8);
 
 -- 书籍标签关联数据
-INSERT INTO book_tag (book_id, tag_id)
+INSERT INTO book_tags (book_id, tag_id)
 SELECT b.book_id, t.tag_id
-FROM book b
-CROSS JOIN tag t
+FROM books b
+CROSS JOIN tags t
 WHERE
     (b.title = '三体' AND t.tag_name = '科技') OR
     (b.title = '人类简史' AND t.tag_name = '历史') OR
@@ -57,12 +57,13 @@ WHERE
     (b.title = '未来简史' AND t.tag_name = '历史');
 
 -- 插入话题
-INSERT INTO topic (title, content, author_user_id) VALUES
-('AI会统治人类吗？', '讨论AI伦理与未来社会的影响', 5),
-('如何理解存在主义？', '从萨特到加缪的哲学探讨', 1),
-('油画基础教程', '零基础学习油画技巧', 4),
-('历史小说推荐', '分享你读过的历史题材小说', 2),
-('冥想与心理健康', '心理学视角下的冥想实践', 3);
+INSERT INTO topics (title, content, author_user_id,like_count) VALUES
+('AI会统治人类吗？', '讨论AI伦理与未来社会的影响', 5, 1235),
+('如何理解存在主义？', '从萨特到加缪的哲学探讨', 1, 3462),
+('油画基础教程', '零基础学习油画技巧', 4, 869),
+('历史小说推荐', '分享你读过的历史题材小说', 2, 934),
+('冥想与心理健康', '心理学视角下的冥想实践', 3, 1212),
+('分享你最喜欢的一本书', '一千个读者心中有一千个哈姆雷特', 6, 660);
 
 -- 话题标签关联
 INSERT INTO topic_tag (topic_id, tag_id) VALUES

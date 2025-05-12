@@ -4,7 +4,7 @@
     <div class="profile-header">
       <img
         :src="userInfo.avatar"
-        data-src=" https://randomuser.me/api/portraits/men/67.jpg"
+        data-src=" https://randomuser.me/api/portraits/men/33.jpg"
         alt="用户头像"
         class="profile-avatar"
       />

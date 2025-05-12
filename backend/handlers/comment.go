@@ -56,7 +56,22 @@ func CreateComment(c *gin.Context) {
 func GetComments(c *gin.Context) {
 	targetType, _ := strconv.Atoi(c.Param("targetType"))
 	targetID, _ := strconv.Atoi(c.Param("targetId"))
-
+	if targetType == 0 || targetID == 0 {
+		var comments []models.Comment
+		err := models.DB.Preload("User").Find(&comments).Error
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取评论失败"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": gin.H{
+				// 所有的详情落地页都用同一个评论区
+				"comments": comments,
+			},
+			"message": "all in one",
+		})
+	}
 	comments, err := models.GetComments(uint(targetID), uint(targetType))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取评论失败"})

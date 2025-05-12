@@ -54,7 +54,7 @@ const menuItems = [
   { name: '兴趣小组', path: '/groups' },
   { name: '热榜', path: '/hot' },
   { name: '好友在读', path: '/friends' },
-  { name: '书友匹配', path: '#', id: 'match-trigger' },
+  // { name: '书友匹配', path: '#', id: 'match-trigger' },
 ];
 
 const goTo = (url) => {

@@ -1,9 +1,11 @@
 import { get, post } from '@/utils/axios';
 
 export function GetBooksListApi(params) {
-    return get('/api/getBooks', params);
+    return get('/api/book/', params);
 }
-
+export function GetRecommendedBooksApi(params) {
+    return get('/api/recommend', params);
+}
 export function GetBookDetailApi(id) {
     return get(`/api/getBookDetail/${id}`);
 }

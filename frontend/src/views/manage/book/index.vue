@@ -71,7 +71,15 @@ const columns = [
 let bookList = ref([]);
 const handleGetBookList = async () => {
   const { data } = await GetBooksListApi();
-  bookList.value = data;
+  bookList.value = data.Books.map(book => ({
+    id: book.BookID,
+    title: book.Title,
+    author: book.Author,
+    cover: book.Cover,
+    rating: book.AverageRating,
+    desc: book.Description,
+    tag: book.Category
+  }));
 };
 handleGetBookList();
 

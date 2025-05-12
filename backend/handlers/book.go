@@ -68,7 +68,14 @@ type DeleteBookResponse struct {
 func GetBookList(c *gin.Context) {
 	var books []models.Book
 	models.DB.Find(&books)
-	c.JSON(http.StatusOK, books)
+	response := gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"Books": books,
+		},
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 func CreateBook(c *gin.Context) {

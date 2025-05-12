@@ -79,6 +79,9 @@ func UnfollowUser(c *gin.Context) {
 // GetFollowing 获取关注列表
 func GetFollowing(c *gin.Context) {
 	userID := c.GetUint("userID")
+	if userID == 0 {
+		userID = 1
+	}
 	follows, err := models.GetFollowing(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取关注列表失败"})
@@ -89,18 +92,28 @@ func GetFollowing(c *gin.Context) {
 	followingUsers := make([]gin.H, len(follows))
 	for i, follow := range follows {
 		followingUsers[i] = gin.H{
-			"user_id":  follow.Followed.UserID,
-			"username": follow.Followed.Username,
-			"avatar":   follow.Followed.Avatar,
+			"id":     follow.Followed.UserID,
+			"name":   follow.Followed.Username,
+			"avatar": follow.Followed.Avatar,
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"following": followingUsers})
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": gin.H{
+			"total": len(followingUsers),
+			"list":  followingUsers,
+		},
+		"message": "获取成功",
+	})
 }
 
 // GetFollowers 获取粉丝列表
 func GetFollowers(c *gin.Context) {
 	userID := c.GetUint("userID")
+	if userID == 0 {
+		userID = 1
+	}
 	follows, err := models.GetFollowers(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取粉丝列表失败"})
@@ -111,11 +124,18 @@ func GetFollowers(c *gin.Context) {
 	followers := make([]gin.H, len(follows))
 	for i, follow := range follows {
 		followers[i] = gin.H{
-			"user_id":  follow.Follower.UserID,
-			"username": follow.Follower.Username,
-			"avatar":   follow.Follower.Avatar,
+			"id":     follow.Follower.UserID,
+			"name":   follow.Follower.Username,
+			"avatar": follow.Follower.Avatar,
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"followers": followers})
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": gin.H{
+			"total": len(followers),
+			"list":  followers,
+		},
+		"message": "获取成功",
+	})
 }
