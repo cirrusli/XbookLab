@@ -2,12 +2,12 @@
   <Header />
   <main class="detail-container">
     <div class="book-detail">
-      <img :src="bookInfo.cover" alt="书籍封面" class="detail-cover" />
+      <img :src="bookInfo.Cover" alt="书籍封面" class="detail-cover" />
       <div class="detail-info">
-        <h1>{{ bookInfo.title }}</h1>
-        <p class="author">作者：{{ bookInfo.author }}</p>
-        <p class="rating">评分：{{ bookInfo.rating }}</p>
-        <p class="desc">{{ bookInfo.desc }}</p>
+        <h1>{{ bookInfo.Title }}</h1>
+        <p class="author">作者：{{ bookInfo.Author }}</p>
+        <p class="rating">评分：{{ bookInfo.AverageRating }}</p>
+        <p class="desc">{{ bookInfo.Description }}</p>
       </div>
     </div>
 
@@ -17,7 +17,7 @@
     </div>
 
     <!-- 评论区 -->
-    <Comment :commentType="0" :bookId="state.bookId" />
+    <Comment :commentType="0" :bookId=state.bookId />
   </main>
 </template>
 
@@ -37,13 +37,13 @@ const route = useRoute();
 
 const state = reactive({
   isLogin: localStorage.getItem('token') ? true : false,
-  bookId: null,
+  bookId: 0,
 });
 
 const bookInfo = ref({}); // 书籍信息
 
 const handleGetBookDetail = async () => {
-  state.bookId = route.params.id; // 获取书籍ID
+  state.bookId = Number(route.params.id); // 获取书籍ID并转换为数字类型
   const { data } = await GetBookDetailApi(state.bookId);
   bookInfo.value = data;
 };
@@ -53,7 +53,7 @@ handleGetBookDetail();
 const rateVal = ref(1);
 const handleSubmitRate = () => {
   let params = {
-    book_id: route.params.id,
+    book_id: Number(route.params.id),
     rating: rateVal.value,
   };
   RecordBookRatingApi(params)

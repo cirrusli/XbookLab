@@ -76,6 +76,7 @@ const handleSubmitComment = () => {
     .then((result) => {
       CreateSuccessMessage('评论成功');
       commentContent.value = '';
+      window.location.reload();
     })
     .catch((err) => {
       console.error(err);

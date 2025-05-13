@@ -12,6 +12,8 @@ type Topic struct {
 	Content      string    `gorm:"type:text"`
 	AuthorUserID uint      `gorm:"index"`
 	LikeCount    uint      `gorm:"default:0"`
+	TagName      string    `gorm:"-"` // 不映射到数据库
+	IsLiked      int      `gorm:"-" json:"isLiked"` // 用于前端显示是否已点过赞
 	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
 

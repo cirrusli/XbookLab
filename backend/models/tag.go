@@ -13,6 +13,11 @@ type BookTag struct {
 	TagID  uint `gorm:"not null"`
 }
 
+type TopicTag struct {
+	TopicID uint `gorm:"not null"`
+	TagID   uint `gorm:"not null"`
+}
+
 func GetAllTags() ([]Tag, error) {
 	var tags []Tag
 	if err := DB.Find(&tags).Error; err != nil {

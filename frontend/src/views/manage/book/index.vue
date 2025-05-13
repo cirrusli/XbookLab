@@ -15,8 +15,8 @@
         </template>
         <template v-else-if="column.key === 'action'">
           <span>
-            <a @click="handleEdit(record.id)">修改</a>
-            <a-divider type="vertical" />
+            <!-- <a @click="handleEdit(record.id)">修改</a>
+            <a-divider type="vertical" /> -->
             <a @click="handleDelete(record.id)">删除</a>
           </span>
         </template>

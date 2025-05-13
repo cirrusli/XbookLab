@@ -77,20 +77,21 @@ const router = useRouter();
 
 const menus = ref([
   { id: 0, name: '全部', value: '' },
-  { id: 1, name: '文学', value: 'literature' },
-  { id: 2, name: '科技', value: 'technology' },
-  { id: 3, name: '历史', value: 'history' },
-  { id: 4, name: '心理', value: 'psychology' },
-  { id: 5, name: '艺术', value: 'art' },
+  { id: 1, name: '科技', value: 'technology' },
+  { id: 2, name: '历史', value: 'history' },
+  { id: 3, name: '心理', value: 'psychology' },
+  { id: 4, name: '艺术', value: 'art' },
+  { id: 5, name: '哲学', value: 'philosophy' },
   { id: 6, name: '商业', value: 'business' },
-  { id: 7, name: '哲学', value: 'philosophy' },
+  { id: 7, name: '文学', value: 'literature' },
 ]);
 const curMenuVal = ref('');
 
 const handleChangeCategory = (name) => {
-  curMenuVal.value = name === '全部' || name === '' ? '' : name;
+  const menuItem = menus.value.find(item => item.name === name);
+  curMenuVal.value = menuItem ? menuItem.id : '';
   handleGetHotTopic();
-  handleGetBookList();
+  handleGetRecommendBookList();
 };
 
 // 获取热门话题
@@ -101,7 +102,7 @@ const handleGetHotTopic = async () => {
     params.tag = curMenuVal.value;
   }
   const { data } = await GetIndexHotTopicApi(params);
-  hotTopicList.value = data;
+  hotTopicList.value = data.slice(0, 6);
 };
 
 handleGetHotTopic();
@@ -123,21 +124,25 @@ const handleGetRecommendBookList = async () => {
     Offset: 0,
     TagFilter: curMenuVal.value || 0
   };
-  const { data } = await GetRecommendedBooksApi(params);
-  bookList.value = data.Books.map(book => ({
-    id: book.BookID,
-    title: book.Title,
-    author: book.Author,
-    cover: book.Cover,
-    rating: book.AverageRating,
-    desc: book.Description,
-    tag: book.Category
-  }));
+  try {
+    const { data } = await GetRecommendedBooksApi(params);
+    bookList.value = data.Books.map(book => ({
+      id: book.BookID,
+      title: book.Title,
+      author: book.Author,
+      cover: book.Cover,
+      rating: book.AverageRating,
+      desc: book.Description,
+      tag: book.Category
+    }));
+  } catch (error) {
+    router.push('/login');
+  }
 };
 handleGetRecommendBookList();
 // 跳转书籍详情
 const goToBookDetail = (bookId) => {
-  router.push({ path: `/book/${bookId}` });
+  router.push({ path: `/book/${Number(bookId)}` });
 };
 
 // 跳转话题详情

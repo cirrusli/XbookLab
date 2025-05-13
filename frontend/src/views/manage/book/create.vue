@@ -34,7 +34,7 @@
         @change="handleUploadChange"
         :custom-request="handleUploadImg"
       >
-        <img v-if="formData.cover" :src="formData.cover" alt="封面" />
+        <img v-if="formData.cover" :src="formData.cover" alt="封面" class="cover-img" style="max-width: 100%; max-height: 200px; object-fit: contain;" />
         <div v-else>
           <div class="ant-upload-text">上传</div>
         </div>
@@ -118,10 +118,10 @@ const rules = {
     { required: true, message: '请选择书籍标签', trigger: 'change' },
     { type: 'string', message: '请选择书籍标签', trigger: 'change' },
   ],
-  cover: [
-    { required: true, message: '请上传书籍封面', trigger: 'change' },
-    { type: 'string', message: '请上传书籍封面', trigger: 'change' },
-  ],
+  // cover: [
+  //   { required: true, message: '请上传书籍封面', trigger: 'change' },
+  //   { type: 'string', message: '请上传书籍封面', trigger: 'change' },
+  // ],
 };
 
 const onSubmit = () => {

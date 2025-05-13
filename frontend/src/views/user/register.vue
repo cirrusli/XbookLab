@@ -7,12 +7,12 @@
       <div class="modal-body">
         <form id="login-form">
           <div class="form-group">
-            <label for="email" class="form-label">电子邮箱</label>
+            <label for="username" class="form-label">用户名</label>
             <input
-              type="email"
-              v-model="formData.email"
+              type="username"
+              v-model="formData.username"
               class="form-input"
-              placeholder="请输入您的邮箱"
+              placeholder="请输入您的用户名"
             />
           </div>
           <div class="form-group">
@@ -43,20 +43,20 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const formData = reactive({
-  email: 'admin@gmail.com',
+  username: '',
   password: '123456',
 });
 
 const validateForm = () => {
-  const { email, password } = formData;
-  if (!email) {
-    CreateErrorMessage('请输入邮箱');
+  const { username, password } = formData;
+  if (!username) {
+    CreateErrorMessage('请输入用户名');
     return false;
   }
-  if (!checkEmail(email)) {
-    CreateErrorMessage('请输入有效的邮箱地址');
-    return false;
-  }
+  // if (!checkEmail(username)) {
+  //   CreateErrorMessage('请输入有效的邮箱地址');
+  //   return false;
+  // }
   if (!password) {
     CreateErrorMessage('请输入密码');
     return false;
@@ -80,7 +80,7 @@ const handleRegister = () => {
       //   localStorage.setItem('token', data.token);
       //   localStorage.setItem('userInfo', JSON.stringify(data));
 
-      //   如果你的逻辑是注册后自动登录的话，就不需要这一步了
+      //   如果是注册后自动登录的话，就不需要这一步了
       router.push('/login');
     })
     .catch((err) => {

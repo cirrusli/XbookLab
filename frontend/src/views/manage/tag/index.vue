@@ -8,8 +8,8 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
           <span>
-            <a @click="handleShowEdit(record.id, record.tag_name)">修改</a>
-            <a-divider type="vertical" />
+            <!-- <a @click="handleShowEdit(record.id, record.tag_name)">修改</a> -->
+            <!-- <a-divider type="vertical" /> -->
             <a @click="handleDelete(record.id)">删除</a>
           </span>
         </template>

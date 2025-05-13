@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 	"xbooklab/models"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +10,7 @@ import (
 
 type RecordBookViewRequest struct {
 	// UserID uint `json:"user_id"`
-	BookID string `json:"book_id"`
+	BookID uint `json:"book_id"`
 }
 
 type RecordBookViewResponse struct {
@@ -21,8 +20,8 @@ type RecordBookViewResponse struct {
 }
 
 type RecordBookRatingRequest struct {
-	BookID string `json:"book_id"`
-	Rating uint   `json:"rating"`
+	BookID uint `json:"book_id"`
+	Rating float32 `json:"rating"`
 }
 
 type RecordBookRatingResponse struct {
@@ -54,15 +53,8 @@ func RecordBookView(c *gin.Context) {
 	if userID == 0 {
 		userID = 1
 	}
-	bookID, err := strconv.Atoi(req.BookID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, RecordBookViewResponse{
-			Code:    400,
-			Message: "invalid book id",
-		})
-		return
-	}
-	if err := models.CreateBookView(userID, uint(bookID)); err != nil {
+
+	if err := models.CreateBookView(userID, uint(req.BookID)); err != nil {
 		c.JSON(http.StatusInternalServerError, RecordBookViewResponse{
 			Code:    500,
 			Message: "failed to record view",
@@ -93,14 +85,8 @@ func RecordBookRating(c *gin.Context) {
 	}
 	log.Println(req.Rating)
 	req.Rating = req.Rating * 2 // 前端传过来的是0-5，这里转换为0-10
-	bookID, err := strconv.Atoi(req.BookID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, RecordBookRatingResponse{
-			Code:    400,
-			Message: "invalid book id",
-		})
-	}
-	if err := models.CreateOrUpdateRating(userID, uint(bookID), req.Rating); err != nil {
+
+	if err := models.CreateOrUpdateRating(userID, uint(req.BookID), uint(req.Rating)); err != nil {
 		c.JSON(http.StatusInternalServerError, RecordBookRatingResponse{
 			Code:    500,
 			Message: "failed to record rating",

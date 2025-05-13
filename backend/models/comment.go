@@ -9,9 +9,12 @@ type Comment struct {
 	Content   string    `gorm:"column:content" json:"content"`
 	UserID    uint      `gorm:"column:user_id" json:"user_id"`
 	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	Time      string    `gorm:"-" json:"time"`
+	Author    string    `gorm:"-" json:"author"`
 	User      User      `gorm:"foreignKey:UserID" json:"user"`
 }
 
+// 防止表名被gorm自动加s
 func (Comment) TableName() string {
 	return "comment"
 }

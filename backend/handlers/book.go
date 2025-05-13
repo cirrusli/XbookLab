@@ -8,13 +8,13 @@ import (
 )
 
 type CreateBookRequest struct {
-	BookID        uint    `json:"book_id"`
-	Title         string  `json:"title"`
-	Author        string  `json:"author"`
-	Cover         string  `json:"cover"`
-	Description   string  `json:"description"`
-	AverageRating float64 `json:"average_rating"`
-	TagName       string  `json:"tag_name"`
+	BookID   uint    `json:"book_id"`
+	Title    string  `json:"title"`
+	Author   string  `json:"author"`
+	Cover    string  `json:"cover"`
+	Desc     string  `json:"desc"`
+	Rating   float64 `json:"rating"`
+	Category string  `json:"category"`
 }
 
 type CreateBookResponse struct {
@@ -90,8 +90,8 @@ func CreateBook(c *gin.Context) {
 		Title:         req.Title,
 		Author:        req.Author,
 		Cover:         req.Cover,
-		Description:   req.Description,
-		AverageRating: req.AverageRating,
+		Description:   req.Desc,
+		AverageRating: req.Rating,
 	}
 	if err := models.DB.Create(&book).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建书籍失败"})
@@ -99,7 +99,7 @@ func CreateBook(c *gin.Context) {
 	}
 
 	// 处理标签
-	tagName := req.TagName
+	tagName := req.Category
 	if tagName == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "标签不能为空"})
 		return
@@ -121,9 +121,47 @@ func CreateBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, book)
+	response := gin.H{
+		"code":    200,
+		"data":    book,
+		"message": "created successfully",
+	}
+	c.JSON(http.StatusCreated, response)
 }
+func UploadBookCover(c *gin.Context) {
+	file, err := c.FormFile("feed_img")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请上传封面图片"})
+		return
+	}
 
+	// 验证文件类型
+	if file.Header.Get("Content-Type") != "image/jpeg" &&
+		file.Header.Get("Content-Type") != "image/png" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "仅支持JPEG/PNG格式"})
+		return
+	}
+
+	// 验证文件大小(3MB限制)
+	if file.Size > 3<<20 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "图片大小不得超过3MB"})
+		return
+	}
+
+	// 保存文件到assets/book_cover目录
+	filePath := "../backend/assets/book_cover/" + file.Filename
+	if err := c.SaveUploadedFile(file, filePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存封面失败"})
+		return
+	}
+
+	// 返回图片URL
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"data":    gin.H{"url": "http://localhost:8000/static/book_cover/" + file.Filename},
+		"message": "上传成功",
+	})
+}
 func GetBookDetail(c *gin.Context) {
 	id := c.Param("id")
 	var book models.Book
@@ -131,7 +169,12 @@ func GetBookDetail(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
 		return
 	}
-	c.JSON(http.StatusOK, book)
+	response := gin.H{
+		"code":    200,
+		"data":    book,
+		"message": "success",
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 func DeleteBook(c *gin.Context) {
@@ -142,7 +185,12 @@ func DeleteBook(c *gin.Context) {
 		return
 	}
 	models.DB.Delete(&book)
-	c.JSON(http.StatusOK, gin.H{"message": "Book deleted successfully"})
+	response := gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "Book deleted successfully",
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 // func GetRecommendedBooks(c *gin.Context) {

@@ -24,9 +24,9 @@ type GetTopicListResponse struct {
 }
 
 type CreateTopicRequest struct {
-	Title        string `json:"title"`
-	Content      string `json:"content"`
-	AuthorUserID uint   `json:"author_user_id"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+	TagName string `json:"tag"`
 }
 
 type CreateTopicResponse struct {
@@ -80,11 +80,20 @@ type Topic struct {
 // 创建话题
 func CreateTopic(c *gin.Context) {
 	var topic models.Topic
-	if err := c.ShouldBindJSON(&topic); err != nil {
+	var req CreateTopicRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	userID := c.GetUint("userID")
+	if userID == 0 {
+		userID = 1
+	}
+	topic.Title = req.Title
+	topic.Content = req.Content
+	topic.TagName = req.TagName
+	topic.AuthorUserID = userID
+	topic.LikeCount = 0
 	// if len(topic.Tag) == 0 {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "必须选择至少一个分类标签"})
 	// 	return
@@ -95,14 +104,58 @@ func CreateTopic(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, topic)
+	// 处理标签关联
+	if req.TagName != "" {
+		// 查找或创建标签
+		var tag models.Tag
+		if err := models.DB.Where("tag_name = ?", req.TagName).FirstOrCreate(&tag, models.Tag{TagName: req.TagName}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "处理标签失败"})
+			return
+		}
+
+		// 创建话题标签关联
+		topicTag := models.TopicTag{
+			TopicID: topic.TopicID,
+			TagID:   tag.TagID,
+		}
+		if err := models.DB.Create(&topicTag).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "创建标签关联失败"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"code":    200,
+		"message": "创建成功",
+		"data":    topic,
+	})
 }
 
 // 获取话题列表
 func GetTopics(c *gin.Context) {
 	var topics []Topic
+	query := models.DB
 
-	if err := models.DB.Find(&topics).Error; err != nil {
+	// 获取tag筛选参数
+	tagID := c.Query("tag")
+	if tagID != "" {
+		query = query.Joins("JOIN topic_tags ON topics.topic_id = topic_tags.topic_id").
+			Where("topic_tags.tag_id = ?", tagID)
+	}
+	timeRange := c.Query("range")
+	if timeRange != "" {
+		switch timeRange {
+		case "today":
+			query = query.Where("created_at >= ?", time.Now().In(time.Local).AddDate(0, 0, -1))
+		case "week":
+			query = query.Where("created_at >= ?", time.Now().In(time.Local).AddDate(0, 0, -7))
+		case "month":
+			query = query.Where("created_at >= ?", time.Now().In(time.Local).AddDate(0, -1, 0))
+		default:
+			query = query.Where("created_at >= ?", time.Now().In(time.Local).AddDate(0, 0, -7))
+		}
+	}
+	if err := query.Select("topics.topic_id, topics.title, topics.content, topics.author_user_id, topics.like_count, topics.created_at").Find(&topics).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取话题列表失败"})
 		return
 	}
@@ -110,10 +163,10 @@ func GetTopics(c *gin.Context) {
 	// 查询每个话题的标签名称和其他信息
 	for i := range topics {
 		var tag models.Tag
-		if err := models.DB.Table("topic_tag").
+		if err := models.DB.Table("topic_tags").
 			Select("tags.tag_name").
-			Joins("join tags on topic_tag.tag_id = tags.tag_id").
-			Where("topic_tag.topic_id = ?", topics[i].TopicID).
+			Joins("join tags on topic_tags.tag_id = tags.tag_id").
+			Where("topic_tags.topic_id = ?", topics[i].TopicID).
 			First(&tag).Error; err == nil {
 			topics[i].TagName = tag.TagName
 		}
@@ -132,7 +185,7 @@ func GetTopics(c *gin.Context) {
 }
 
 // 获取单个话题
-func GetTopic(c *gin.Context) {
+func GetTopicDetail(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的话题ID"})
@@ -150,7 +203,32 @@ func GetTopic(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, topic)
+	// 查询话题关联的标签
+	var tag models.Tag
+	if err := models.DB.Table("topic_tags").
+		Select("tags.tag_name").
+		Joins("join tags on topic_tags.tag_id = tags.tag_id").
+		Where("topic_tags.topic_id = ?", topic.TopicID).
+		First(&tag).Error; err == nil {
+		topic.TagName = tag.TagName
+	}
+
+	// 检查当前用户是否点赞过该话题
+	userID := c.GetUint("userID")
+	if userID > 0 {
+		var like models.TopicLike
+		if err := models.DB.Where("user_id = ? AND topic_id = ?", userID, topic.TopicID).First(&like).Error; err == nil {
+			topic.IsLiked = 1
+		} else {
+			topic.IsLiked = 0
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"data":    topic,
+		"message": "获取成功",
+	})
 }
 
 // 更新话题

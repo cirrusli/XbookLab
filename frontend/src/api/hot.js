@@ -32,12 +32,12 @@ export function GetTopicDetailApi(id) {
 
 // 点赞话题
 export function LikeTopicApi(params) {
-    return post("/api/likeTopic", params)
+    return post("/api/like/topic", params)
 }
 
 // 创建话题
 export function CreateTopicApi(params) {
-    return post("/api/createTopic", params)
+    return post("/api/topic/", params)
 }
 
 // 删除话题

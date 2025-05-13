@@ -20,8 +20,8 @@ func GetRecommendedBooks(userID uint, limit int, offset int, tagFilter int) ([]B
 		Where("recommend.user_id = ?", userID)
 
 	if tagFilter > 0 {
-		query = query.Joins("JOIN book_tag ON recommend.book_id = book_tag.book_id").
-			Where("book_tag.tag_id = ?", tagFilter)
+		query = query.Joins("JOIN book_tags ON recommend.book_id = book_tags.book_id").
+			Where("book_tags.tag_id = ?", tagFilter)
 	}
 
 	err := query.Order("recommend.score DESC").Offset(offset).Limit(limit).Find(&books).Error

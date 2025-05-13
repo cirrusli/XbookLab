@@ -7,7 +7,7 @@ export function LoginApi(data) {
 
 // 注册
 export function RegisterApi(data) {
-    return post('/api/register', data)
+    return post('/api/user/register', data)
 }
 
 // 退出登录

@@ -42,7 +42,10 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "注册成功"})
+	c.JSON(http.StatusCreated, gin.H{
+		"code": 200,
+		"data":"",
+		"message": "注册成功，请登录"})
 }
 
 func GetUserProfile(c *gin.Context) {
@@ -95,7 +98,10 @@ func UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "用户信息更新成功"})
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": "",
+		"message": "用户信息更新成功"})
 }
 
 func GetUserList(c *gin.Context) {

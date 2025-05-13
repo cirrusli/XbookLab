@@ -177,6 +177,7 @@ const handleSubmit = () => {
           if (res.code === 200) {
             CreateSuccessMessage('创建成功');
             modalVisible.value = false;
+            window.location.reload();
           } else {
             CreateErrorMessage(res.msg);
           }

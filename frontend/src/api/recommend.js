@@ -1,4 +1,5 @@
 import { get, post } from '@/utils/axios';
+import axios from 'axios';
 
 export function GetBooksListApi(params) {
     return get('/api/book/', params);
@@ -21,7 +22,7 @@ export function GetBookCommentsApi(params) {
 
 // 记录用户评论
 export function RecordBookCommentApi(params) {
-    return post("/api/comment", params)
+    return post("/api/comment/", params)
 }
 
 // 记录用户评分
@@ -37,7 +38,7 @@ export function GetManageBooksListApi(params) {
 
 // 创建书籍
 export function CreateBookApi(params) {
-    return post('/api/manage/createBook', params);
+    return post('/api/book/', params);
 }
 
 // 编辑书籍
@@ -46,6 +47,29 @@ export function EditBookApi(params) {
 }
 
 // 上传图片
-export function UploadImgApi(params) {
-    return post('/api/manage/uploadImg', params);
+export function UploadImgApi(formData) {
+    return axios({
+        method: "POST",
+        url: 'http://localhost:8000/api/book/upload',
+        data: formData,
+        headers: {
+            "Content-Type": "multipart/form-data",
+            "Accept": "application/json"
+        },
+        timeout: 50000
+    }).then(response => {
+        const { code, message } = response.data;
+        if (code === 200) {
+            return response.data;
+        } else {
+            CreateErrorMessage(message || "系统出错");
+            return Promise.reject(message || "Error");
+        }
+    }).catch(error => {
+        if (error.response.data) {
+            const { message } = error.response.data;
+            CreateErrorMessage(message || "系统出错");
+        }
+        return Promise.reject(error.message);
+    });
 }

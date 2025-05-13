@@ -4,7 +4,7 @@
     <main class="main-container">
       <aside class="sidebar">
         <ul class="menus">
-          <li><router-link to="/user/account">编辑个人资料</router-link></li>
+          <li><router-link to="/user/account">更新信息</router-link></li>
           <li><router-link to="/user/changePwd">修改密码</router-link></li>
           <li><router-link to="/manage/book">书籍管理</router-link></li>
           <li><router-link to="/manage/tag">标签管理</router-link></li>
@@ -46,7 +46,7 @@ import Header from '@/components/Header/index.vue';
 }
 
 .menus {
-  line-height: 30px;
+  line-height: 40px;
   a {
     color: var(--text-dark);
     font-size: 14px;

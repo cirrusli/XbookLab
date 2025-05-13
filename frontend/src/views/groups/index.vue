@@ -26,7 +26,7 @@
             <p class="group-desc">{{ item.desc }}</p>
             <div class="group-meta">
               <span>{{ item.members }}成员 · {{ item.topics }}话题</span>
-              <button class="join-btn">加入</button>
+              <button class="join-btn" @click="handleJoinGroup(item.id)">加入</button>
             </div>
           </div>
         </div>
@@ -38,6 +38,7 @@
 <script setup>
 import { ref } from 'vue';
 import { GetGroupListApi } from '@/api/group.js';
+import { CreateSuccessMessage, CreateErrorMessage } from '@/utils/alert.js';
 
 const menus = ref([
   { id: 0, tag: '全部', tagVal: '' },
@@ -57,6 +58,17 @@ const handleGetGroups = async (tagVal) => {
   };
   const { data } = await GetGroupListApi(params);
   groupList.value = data;
+};
+
+const handleJoinGroup = async (groupId) => {
+  try {
+    // 这里需要调用加入API
+    // const { data } = await JoinGroupApi({ groupId });
+    CreateSuccessMessage('加入成功');
+  } catch (error) {
+    console.error(error);
+    CreateErrorMessage('加入失败');
+  }
 };
 
 const handleChangeCategory = (id, tagVal) => {

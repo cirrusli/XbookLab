@@ -21,8 +21,8 @@ type LoginRequest struct {
 }
 
 type ChangePasswordRequest struct {
-	OldPassword string `json:"oldPassword" binding:"required"`
-	NewPassword string `json:"newPassword" binding:"required"`
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
 }
 
 func Login(c *gin.Context) {
@@ -34,12 +34,16 @@ func Login(c *gin.Context) {
 
 	var user models.User
 	if err := models.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名或密码错误"})
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 401,
+			"error": "用户名或密码错误"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户名或密码错误"})
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 401,
+			"error": "用户名或密码错误"})
 		return
 	}
 
@@ -104,5 +108,7 @@ func ChangePassword(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "密码修改成功"})
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"message": "密码修改成功"})
 }

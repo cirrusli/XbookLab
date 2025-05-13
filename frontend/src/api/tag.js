@@ -5,7 +5,7 @@ export function GetManageTagListApi() {
 }
 
 export function CreateTagApi(params) {
-    return post("/api/manage/createTag", params)
+    return post("/api/tag/", params)
 }
 
 export function EditTagApi(params) {
@@ -13,5 +13,5 @@ export function EditTagApi(params) {
 }
 
 export function DelTagApi(params) {
-    return post('/api/manage/delTag', params)
+    return post('/api/tag/delete', params)
 }

@@ -21,9 +21,9 @@
           </div>
           <ul class="user-dropdown">
             <li><router-link to="/user">个人主页</router-link></li>
-            <li><router-link to="/user/account">账号管理</router-link></li>
+            <li><router-link to="/user/account">后台管理</router-link></li>
             <li>
-              <a class="logout-btn" @click="handleLogout">退出</a>
+              <a class="logout-btn" @click="handleLogout">退出登录</a>
             </li>
           </ul>
         </template>
@@ -83,6 +83,7 @@ const handleLogout = () => {
           if (route.meta.needAuth) {
             router.push('/');
           }
+          window.location.reload();
         })
         .catch((err) => {
           console.error(err);

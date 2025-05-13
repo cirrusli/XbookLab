@@ -15,10 +15,16 @@ type Book struct {
 }
 
 // GetPopularBooks 获取高分书籍
-func GetPopularBooks(limit int) []Book {
+func GetPopularBooks(limit int, tagFilter int) []Book {
 	var books []Book
-	DB.Order("average_rating desc").Limit(limit).Find(&books)
+	query := DB.Order("average_rating desc").Limit(limit)
 
+	if tagFilter > 0 {
+		query = query.Joins("JOIN book_tags ON books.book_id = book_tags.book_id").
+			Where("book_tags.tag_id = ?", tagFilter)
+	}
+
+	query.Find(&books)
 	return books
 }
 

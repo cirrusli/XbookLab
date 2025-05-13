@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,8 +12,8 @@ import (
 
 type CreateCommentRequest struct {
 	Content  string `json:"content"`
-	TargetID uint   `json:"target_id"`
-	Type     uint   `json:"type"`
+	TargetID string `json:"comment_id"`
+	Type     uint   `json:"comment_type"`
 }
 
 type CreateCommentResponse struct {
@@ -37,19 +38,36 @@ type RecordCommentResponse struct {
 
 // CreateComment 创建评论
 func CreateComment(c *gin.Context) {
+	var req CreateCommentRequest
 	var comment models.Comment
-	if err := c.ShouldBindJSON(&comment); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	comment.UserID = c.GetUint("userID")
+	log.Println(comment.UserID)
+	if comment.UserID == 0 {
+		comment.UserID = 1
+	}
+	comment.Content = req.Content
+	targetIDInt, err := strconv.Atoi(req.TargetID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "TargetID 转换失败"})
+		return
+	}
+	comment.TargetID = uint(targetIDInt)
+	comment.Type = uint8(req.Type)
 	if err := models.CreateComment(&comment); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建评论失败"})
 		return
 	}
 
-	c.JSON(http.StatusOK, comment)
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"data":    "",
+		"message": "all in one",
+	})
 }
 
 // GetComments 获取评论列表
@@ -58,17 +76,22 @@ func GetComments(c *gin.Context) {
 	targetID, _ := strconv.Atoi(c.Param("targetId"))
 	if targetType == 0 || targetID == 0 {
 		var comments []models.Comment
-		err := models.DB.Preload("User").Find(&comments).Error
+		err := models.DB.Preload("User").Order("created_at DESC").Find(&comments).Error
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取评论失败"})
 			return
 		}
+		for i := range comments {
+			if comments[i].User.Username == "" {
+				comments[i].User.Username = "匿名用户"
+			}
+			comments[i].Author = comments[i].User.Username
+			comments[i].Time = comments[i].CreatedAt.Local().Format("2006-01-02 15:04:05")
+
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"code": 200,
-			"data": gin.H{
-				// 所有的详情落地页都用同一个评论区
-				"comments": comments,
-			},
+			"code":    200,
+			"data":    comments,
 			"message": "all in one",
 		})
 		return

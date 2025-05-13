@@ -40,7 +40,7 @@ func InitRouter() *gin.Engine {
 	// 用户相关路由
 	user := r.Group("/api/user")
 	user.POST("/register", handlers.Register)
-	// user.Use(middleware.AuthMiddleware())
+	user.Use(middleware.AuthMiddleware())
 	{
 		// 现在只能获取自己的信息
 		user.POST("/profile", handlers.GetUserProfile)
@@ -56,13 +56,14 @@ func InitRouter() *gin.Engine {
 	{
 		book.GET("/", handlers.GetBookList)
 		book.POST("/", handlers.CreateBook)
+		book.POST("/upload", handlers.UploadBookCover)
 		book.GET("/:id", handlers.GetBookDetail)
 		book.DELETE("/:id", handlers.DeleteBook)
-		book.GET("/comments",handlers.GetComments)
+		book.GET("/comments", handlers.GetComments)
 	}
 
 	// 推荐书籍路由
-	r.GET("/api/recommend", handlers.GetRecommendedBooks)
+	r.GET("/api/recommend", middleware.AuthMiddleware(), handlers.GetRecommendedBooks)
 	r.GET("/api/getGroups", handlers.GetGroups)
 	r.GET("/api/getFriendsBook", handlers.GetFriendsBooks)
 
@@ -76,10 +77,11 @@ func InitRouter() *gin.Engine {
 
 	// 话题相关路由
 	topic := r.Group("/api/topic")
+	topic.Use(middleware.AuthMiddleware())
 	{
 		topic.GET("/", handlers.GetTopics)
 		topic.POST("/", handlers.CreateTopic)
-		topic.GET("/:id", handlers.GetTopic)
+		topic.GET("/:id", handlers.GetTopicDetail)
 		topic.PUT("/:id", handlers.UpdateTopic)
 		topic.DELETE("/:id", handlers.DeleteTopic)
 	}
@@ -97,8 +99,7 @@ func InitRouter() *gin.Engine {
 	like := r.Group("/api/like")
 	like.Use(middleware.AuthMiddleware())
 	{
-		like.POST("/topic/:id", handlers.LikeTopic)
-		like.DELETE("/topic/:id", handlers.UnlikeTopic)
+		like.POST("/topic", handlers.LikeTopic)
 	}
 
 	// 用户动态路由
@@ -114,7 +115,7 @@ func InitRouter() *gin.Engine {
 	{
 		tag.GET("/", handlers.GetTagList)
 		tag.POST("/", handlers.AddTag)
-		tag.DELETE("/:id", handlers.DeleteTag)
+		tag.POST("/delete", handlers.DeleteTag)
 	}
 
 	// 用户管理路由

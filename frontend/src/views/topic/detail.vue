@@ -2,17 +2,17 @@
   <Header />
   <main class="detail-container">
     <article class="topic-detail">
-      <h1>{{ topicInfo.title }}</h1>
+      <h1>{{ topicInfo.Title }}</h1>
       <div class="meta">
-        <span>{{ topicInfo.tag }}</span>
-        <span>{{ topicInfo.likes }}赞</span>
+        <span>{{ topicInfo.TagName }}</span>
+        <span>{{ topicInfo.LikeCount }}赞</span>
         <span
           class="topic-likes"
           :class="{ active: topicInfo.isLiked === 1 }"
           @click="handleLikeTopic(topicInfo.isLiked)"
         ></span>
       </div>
-      <div class="content">{{ topicInfo.desc }}</div>
+      <div class="content">{{ topicInfo.Content }}</div>
     </article>
     <!-- 评论区 -->
     <Comment :commentType="1" :topicId="state.topicId" />
@@ -47,10 +47,11 @@ const handleLikeTopic = (curStatus) => {
     return false;
   }
   let newStatus = curStatus === 1 ? 2 : 1;
-  LikeTopicApi({ is_liked: newStatus })
+  LikeTopicApi({ is_liked: newStatus, topic_id: Number(state.topicId) })
     .then((result) => {
       CreateSuccessMessage(result.message);
       topicInfo.value.isLiked = newStatus;
+      window.location.reload();
     })
     .catch((err) => {
       console.error(err);
