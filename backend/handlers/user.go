@@ -18,7 +18,7 @@ type RegisterRequest struct {
 }
 
 type UpdateUserRequest struct {
-	Username string `json:"username"`
+	Username string `json:"name"`
 	Avatar   string `json:"avatar"`
 	Bio      string `json:"bio"`
 }
@@ -89,7 +89,7 @@ func UpdateUserProfile(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
 		return
 	}
-
+	user.Username = req.Username
 	user.Avatar = req.Avatar
 	user.Bio = req.Bio
 
