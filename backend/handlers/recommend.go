@@ -23,6 +23,9 @@ type GetRecommendedBooksResponse struct {
 	RecommendationReason string        `json:"recommendation_reason"`
 }
 
+// 推荐补充开关
+var useStrategy bool = true
+
 // GetRecommendedBooks 实现书籍推荐逻辑
 func GetRecommendedBooks(c *gin.Context) {
 	// 解析URL查询参数
@@ -42,21 +45,32 @@ func GetRecommendedBooks(c *gin.Context) {
 		return
 	}
 	// 定义推荐策略的类型
-	type recommendStrategy func(userID uint, limit int, tagFilter int) []models.Book
+	type recommendStrategy struct {
+		name     string
+		strategy func(userID uint, limit int, tagFilter int) []models.Book
+	}
 
 	// 推荐策略实现
 	var strategies = []recommendStrategy{
-		func(userID uint, limit int, tagFilter int) []models.Book {
-			return recommendByCF(userID, tagFilter)
+		{
+			name: "协同过滤排除已评分和已浏览推荐",
+			strategy: func(userID uint, limit int, tagFilter int) []models.Book {
+				return recommendNotRatingAndViewByCF(userID, tagFilter)
+			},
 		},
-		func(userID uint, limit int, tagFilter int) []models.Book {
-			return recommendByEvent()
+		{
+			name: "事件推荐",
+			strategy: func(userID uint, limit int, tagFilter int) []models.Book {
+				return recommendByEvent()
+			},
 		},
-		func(userID uint, limit int, tagFilter int) []models.Book {
-			return models.GetPopularBooks(limit, tagFilter)
+		{
+			name: "热门推荐",
+			strategy: func(userID uint, limit int, tagFilter int) []models.Book {
+				return models.GetPopularBooks(limit, tagFilter)
+			},
 		},
 	}
-
 	realLimit := int(req.Limit) - 5
 	log.Println("userID:", userID, "limit:", realLimit, "offset:", req.Offset, "tagFilter:", req.TagFilter)
 
@@ -66,21 +80,24 @@ func GetRecommendedBooks(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("推荐表中的数据量: %d recommendedBooks: %v", len(recommendedBooks), recommendedBooks)
+	log.Printf("推荐表中的数据量: %d", len(recommendedBooks))
 
 	// 如果推荐数量不足，依次使用策略填充
 	remaining := realLimit - len(recommendedBooks)
 
 	for _, strategy := range strategies {
+		if !useStrategy {
+			break
+		}
 		if remaining <= 0 {
 			break
 		}
-		strategyBooks := strategy(userID, remaining, int(req.TagFilter))
+		strategyBooks := strategy.strategy(userID, remaining, int(req.TagFilter))
 		if len(strategyBooks) > 0 {
 			take := int(math.Min(float64(remaining), float64(len(strategyBooks))))
 			recommendedBooks = append(recommendedBooks, strategyBooks[:take]...)
 			remaining -= take
-			log.Printf("策略 [%T] 追加: 实际追加 %d 本，剩余 %d", strategy, take, remaining)
+			log.Printf("策略 [%s] 追加: 实际追加 %d 本，剩余 %d", strategy.name, take, remaining)
 		}
 	}
 
@@ -94,6 +111,52 @@ func GetRecommendedBooks(c *gin.Context) {
 		},
 	}
 	c.JSON(http.StatusOK, response)
+}
+func recommendNotRatingAndViewByCF(userID uint, tagFilter int) []models.Book {
+	// 获取基础数据
+	ratings, _ := models.GetUserRatings(userID)
+	viewBookIDs, _ := models.GetUserViews(userID)
+	followedUsers, _ := models.GetFollowedUsers(userID)
+
+	// 基于评分计算用户相似度
+	similarUsers := calculateUserSimilarity(userID, ratings)
+
+	// 排除已评分书籍
+	ratedBookIDs := getRatedBooks(ratings)
+
+	// 获取相似用户集合（关注用户+评分相似用户）
+	if len(similarUsers) < 5 && len(followedUsers) > 0 {
+		similarUsers = append(similarUsers, followedUsers[:int(math.Min(5, float64(len(followedUsers))))]...)
+	}
+
+	// 获取相似用户的评分书籍
+	// 获取未评分且高相似用户的推荐书籍
+	excludedBooks := append(ratedBookIDs, viewBookIDs...)
+	cfBooks, err := models.FindSimilarUsers(userID, similarUsers, excludedBooks)
+	if err != nil {
+		return nil
+	}
+
+	// 应用标签过滤
+	if tagFilter > 0 {
+		var filtered []models.Book
+		for _, b := range cfBooks {
+			var count int64
+			models.DB.Table("book_tags").
+				Where("book_id = ? AND tag_id = ?", b.BookID, tagFilter).
+				Count(&count)
+			if count > 0 {
+				filtered = append(filtered, b)
+			}
+		}
+		cfBooks = filtered
+	}
+
+	return cfBooks
+}
+
+func recommendByEvent() []models.Book {
+	return nil
 }
 
 // 获取用户最近的评分、关注、浏览、评论行为，综合插入新的推荐数据
@@ -184,51 +247,4 @@ func getRatedBooks(ratings []models.Rating) []uint {
 		bookIDs = append(bookIDs, r.BookID)
 	}
 	return bookIDs
-}
-
-func recommendByCF(userID uint, tagFilter int) []models.Book {
-	// 获取基础数据
-	ratings, _ := models.GetUserRatings(userID)
-	viewBookIDs, _ := models.GetUserViews(userID)
-	followedUsers, _ := models.GetFollowedUsers(userID)
-
-	// 基于评分计算用户相似度
-	similarUsers := calculateUserSimilarity(userID, ratings)
-
-	// 排除已评分书籍
-	ratedBookIDs := getRatedBooks(ratings)
-
-	// 获取相似用户集合（关注用户+评分相似用户）
-	if len(similarUsers) < 5 && len(followedUsers) > 0 {
-		similarUsers = append(similarUsers, followedUsers[:int(math.Min(5, float64(len(followedUsers))))]...)
-	}
-
-	// 获取相似用户的评分书籍
-	// 获取未评分且高相似用户的推荐书籍
-	excludedBooks := append(ratedBookIDs, viewBookIDs...)
-	cfBooks, err := models.FindSimilarUsers(userID, similarUsers, excludedBooks)
-	if err != nil {
-		return nil
-	}
-
-	// 应用标签过滤
-	if tagFilter > 0 {
-		var filtered []models.Book
-		for _, b := range cfBooks {
-			var count int64
-			models.DB.Table("book_tags").
-				Where("book_id = ? AND tag_id = ?", b.BookID, tagFilter).
-				Count(&count)
-			if count > 0 {
-				filtered = append(filtered, b)
-			}
-		}
-		cfBooks = filtered
-	}
-
-	return cfBooks
-}
-
-func recommendByEvent() []models.Book {
-	return nil
 }
