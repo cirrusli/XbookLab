@@ -78,12 +78,15 @@ func Logout(c *gin.Context) {
 	// 后台需要把token加入redis的黑名单，key是userid，24小时过期
 	userID := c.MustGet("userID").(uint)
 	token := c.MustGet("token").(string)
-	err := models.RDB.Ping(context.Background()).Err()
-	if err == nil {
-		models.RDB.Set(context.Background(), string(userID), token, time.Hour*24)
-	} else {
-		log.Println("Logout: redis连接失败", err)
+	if models.RDB != nil {
+		err := models.RDB.Ping(context.Background()).Err()
+		if err == nil {
+			models.RDB.Set(context.Background(), string(userID), token, time.Hour*24)
+		} else {
+			log.Println("Logout: redis连接失败", err)
+		}
 	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":    200,
 		"data":    "",

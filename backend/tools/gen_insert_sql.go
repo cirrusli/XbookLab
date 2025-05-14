@@ -155,7 +155,7 @@ func genInsertUserAndUserTagSQL() {
 		tagCount := rand.Intn(3) + 1
 		for j := 0; j < tagCount; j++ {
 			tagID := rand.Intn(5) + 1
-			userTagSQL := fmt.Sprintf("INSERT INTO `user_tag` (`user_id`, `tag_id`) VALUES (%d, %d);", i, tagID)
+			userTagSQL := fmt.Sprintf("INSERT INTO `user_tags` (`user_id`, `tag_id`) VALUES (%d, %d);", i, tagID)
 			userTagInserts = append(userTagInserts, userTagSQL)
 		}
 	}
@@ -180,7 +180,7 @@ func genInsertUserAndUserTagSQL() {
 
 	// 写入批量用户标签关联插入语句
 	file.WriteString("\n-- 批量用户标签关联插入语句\n\n")
-	batchSQL = "INSERT INTO `user_tag` (`user_id`, `tag_id`) VALUES "
+	batchSQL = "INSERT INTO `user_tags` (`user_id`, `tag_id`) VALUES "
 	for i, sql := range userTagInserts {
 		if i > 0 {
 			batchSQL += ", "

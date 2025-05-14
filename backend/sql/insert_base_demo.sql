@@ -11,7 +11,7 @@ INSERT INTO users (username, password, avatar, bio) VALUES
 ('elon-musk', '$10$2uOLR.hS4Vtb1wUfhOyDYuabYSMu9ACVkz0T4aNjSTaw0OAQREsMW', 'https://randomuser.me/api/portraits/men/36.jpg', '科技公司CEO，关注AI发展');
 
 -- 用户兴趣标签关联数据
-INSERT INTO user_tag (user_id, tag_id)
+INSERT INTO user_tags (user_id, tag_id)
 SELECT u.user_id, t.tag_id
 FROM users u
 CROSS JOIN tags t
