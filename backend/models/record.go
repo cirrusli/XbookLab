@@ -10,6 +10,8 @@ type BookView struct {
 	UserID    uint      `gorm:"index"`
 	BookID    uint      `gorm:"not null;index"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	User      User      `gorm:"foreignKey:UserID"`
+	Book      Book      `gorm:"foreignKey:BookID"`
 }
 
 // Rating 评分模型
