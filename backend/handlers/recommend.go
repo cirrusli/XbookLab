@@ -18,7 +18,8 @@ type GetRecommendedBooksRequest struct {
 }
 
 // 推荐补充开关
-var useStrategy bool = false
+var useStrategy bool = true
+var cutFiveLimit int
 
 // GetRecommendedBooks 实现书籍推荐逻辑
 func GetRecommendedBooks(c *gin.Context) {
@@ -46,18 +47,18 @@ func GetRecommendedBooks(c *gin.Context) {
 
 	// 推荐策略实现
 	var strategies = []recommendStrategy{
-		{
-			name: "协同过滤排除已评分和已浏览推荐",
-			strategy: func(userID uint, limit int, tagFilter int) []models.Book {
-				return recommendNotRatingAndViewByCF(userID, tagFilter)
-			},
-		},
-		{
-			name: "事件推荐",
-			strategy: func(userID uint, limit int, tagFilter int) []models.Book {
-				return recommendByEvent()
-			},
-		},
+		// {
+		// 	name: "协同过滤排除已评分和已浏览推荐",
+		// 	strategy: func(userID uint, limit int, tagFilter int) []models.Book {
+		// 		return recommendNotRatingAndViewByCF(userID, tagFilter)
+		// 	},
+		// },
+		// {
+		// 	name: "事件推荐",
+		// 	strategy: func(userID uint, limit int, tagFilter int) []models.Book {
+		// 		return recommendByEvent()
+		// 	},
+		// },
 		{
 			name: "热门推荐",
 			strategy: func(userID uint, limit int, tagFilter int) []models.Book {
@@ -65,7 +66,8 @@ func GetRecommendedBooks(c *gin.Context) {
 			},
 		},
 	}
-	realLimit := int(req.Limit) - 5
+	// cutFiveLimit = 5 // 注释掉则拉取10条
+	realLimit := int(req.Limit) - cutFiveLimit
 	log.Println("userID:", userID, "limit:", realLimit, "offset:", req.Offset, "tagFilter:", req.TagFilter)
 
 	// 获取协同过滤推荐

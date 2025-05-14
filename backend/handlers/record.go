@@ -20,7 +20,7 @@ type RecordBookViewResponse struct {
 }
 
 type RecordBookRatingRequest struct {
-	BookID uint `json:"book_id"`
+	BookID uint    `json:"book_id"`
 	Rating float32 `json:"rating"`
 }
 
@@ -62,6 +62,11 @@ func RecordBookView(c *gin.Context) {
 		return
 	}
 
+	// 更新推荐评分（浏览+0.1）
+	if err := models.UpsertRecommendScore(userID, uint(req.BookID), 0.1); err != nil {
+		log.Printf("更新推荐评分失败: %v", err)
+	}
+
 	c.JSON(http.StatusOK, RecordBookViewResponse{
 		Code:    200,
 		Data:    "",
@@ -92,6 +97,11 @@ func RecordBookRating(c *gin.Context) {
 			Message: "failed to record rating",
 		})
 		return
+	}
+
+	// 更新推荐评分（评分+0.5）
+	if err := models.UpsertRecommendScore(userID, uint(req.BookID), 0.5); err != nil {
+		log.Printf("更新推荐评分失败: %v", err)
 	}
 
 	c.JSON(http.StatusOK, RecordBookRatingResponse{

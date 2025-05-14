@@ -12,7 +12,7 @@ import (
 
 type CreateCommentRequest struct {
 	Content  string `json:"content"`
-	TargetID string `json:"comment_id"`
+	TargetID uint   `json:"comment_id"`
 	Type     uint   `json:"comment_type"`
 }
 
@@ -51,16 +51,16 @@ func CreateComment(c *gin.Context) {
 		comment.UserID = 1
 	}
 	comment.Content = req.Content
-	targetIDInt, err := strconv.Atoi(req.TargetID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "TargetID 转换失败"})
-		return
-	}
-	comment.TargetID = uint(targetIDInt)
+	comment.TargetID = req.TargetID
 	comment.Type = uint8(req.Type)
 	if err := models.CreateComment(&comment); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建评论失败"})
 		return
+	}
+
+	// 更新推荐评分（评论+0.5，targetID为bookID）
+	if err := models.UpsertRecommendScore(comment.UserID, comment.TargetID, 0.5); err != nil {
+		log.Printf("更新推荐评分失败: %v", err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

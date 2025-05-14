@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // 同tools/import_recommend.go
@@ -30,6 +32,17 @@ func GetRecommendedBooks(userID uint, limit int, offset int, tagFilter int) ([]B
 
 func (r *Recommendation) TableName() string {
 	return "recommend"
+}
+
+func UpsertRecommendScore(userID uint, bookID uint, score float64) error {
+	return DB.Transaction(func(tx *gorm.DB) error {
+		err := tx.Exec(`
+			INSERT INTO recommend (user_id, book_id, score, updated)
+			VALUES (?, ?, ?, ?)
+			ON DUPLICATE KEY UPDATE score = score + ?, updated = ?
+		`, userID, bookID, score, time.Now(), score, time.Now()).Error
+		return err
+	})
 }
 
 // 获取用户评分记录

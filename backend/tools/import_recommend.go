@@ -1,35 +1,23 @@
 package main
 
-/*
-协同过滤推荐算法实现说明
-
-本文件实现了一个基于用户行为的协同过滤推荐系统，主要包含以下核心组件：
-
-1. 算法流程概述：
-   - 为每个用户并发计算个性化推荐
-   - 结合用户评分、浏览记录、标签和社交关系等多维度数据
-   - 使用加权混合策略生成最终推荐结果
-
-2. 相似度计算方法：
-   - Jaccard相似度：基于用户标签计算兴趣相似度
-   - 余弦相似度：基于用户评分向量计算偏好相似度
-   - 综合相似度：加权平均上述两种相似度(标签40% + 评分60%)
-
-3. 推荐来源：
-   - 用户相似度推荐：基于相似用户的高评分书籍
-   - 社交关系推荐：基于关注用户的高评分书籍
-   - 标签匹配推荐：基于用户兴趣标签的热门书籍
-
-4. 评分机制：
-   - 相似用户推荐权重：60%
-   - 标签匹配推荐权重：40%
-   - 最终得分归一化处理
-
-5. 并发处理：
-   - 使用goroutine并发处理每个用户的推荐计算
-   - 通过channel收集结果
-   - 使用WaitGroup同步并发任务
-*/
+// 协同过滤推荐算法实现
+// 涉及MySQL表说明：
+// - users: 存储用户基础信息，用于获取所有用户ID（字段：user_id）
+// - ratings: 存储用户对书籍的评分数据（字段：user_id, book_id, rating_value）
+// - book_views: 存储用户浏览书籍的记录（字段：user_id, book_id）
+// - user_tags: 存储用户兴趣标签关联关系（字段：user_id, tag_id）
+// - follow: 存储用户关注关系（字段：follower_id, followed_id）
+// - book_tags: 存储书籍与标签的关联关系（字段：book_id, tag_id）
+// - recommend: 存储最终推荐结果（字段：user_id, book_id, score, update_at）
+//
+// 用户视角数据流转说明：
+// 1. 用户信息获取：从users表获取所有用户ID，针对每个用户从ratings获取评分记录、从book_views获取浏览记录、从user_tags获取兴趣标签、从follow获取关注用户
+// 2. 相似用户计算：基于用户标签（Jaccard相似度）和评分（余弦相似度）计算与目标用户的相似度，筛选相似度>0.3的前10名用户
+// 3. 推荐书籍生成：
+//    a. 合并相似用户与关注用户作为推荐来源，提取来源用户评分≥7的书籍（排除用户已评分/浏览的书籍）
+//    b. 结合用户兴趣标签，从book_tags表提取标签匹配度高的书籍（排除用户已交互书籍）
+//    c. 补充探索性推荐：选取用户未接触但全局评分≥8的书籍（标签与用户兴趣无交集）
+// 4. 结果存储：合并多来源推荐分数，生成最终推荐结果并批量插入recommend表
 
 import (
 	"database/sql"
@@ -37,6 +25,7 @@ import (
 	"log"
 	"math"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -128,7 +117,14 @@ func calculateUserRecommendations(db *sql.DB, userID uint) []Recommendation {
 	recommendationSources := append(similarUsers, followedUsers...)
 	// 7. 计算推荐书籍
 	recommendedBooks := calculateRecommendedBooks(db, userID, recommendationSources, userTags)
-	// 8. 生成推荐结果
+
+	// 8. 整合探索性推荐
+	exploreBooks := getExplorationBooks(db, userID)
+	// 累加探索性推荐分数
+	for bookID, score := range exploreBooks {
+		recommendedBooks[bookID] += score
+	}
+	// 生成推荐结果
 	var recommendations []Recommendation
 	for bookID, score := range recommendedBooks {
 		recommendations = append(recommendations, Recommendation{
@@ -138,14 +134,13 @@ func calculateUserRecommendations(db *sql.DB, userID uint) []Recommendation {
 			Updated: time.Now().In(time.FixedZone("CST", 8*3600)),
 		})
 	}
-
 	return recommendations
 }
 
 // 获取用户评分数据
 func getUserRatings(db *sql.DB, userID uint) map[uint]float64 {
 	ratings := make(map[uint]float64)
-	rows, err := db.Query("SELECT book_id, rating_value FROM rating WHERE user_id = ?", userID)
+	rows, err := db.Query("SELECT book_id, rating_value FROM ratings WHERE user_id = ?", userID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -165,7 +160,7 @@ func getUserRatings(db *sql.DB, userID uint) map[uint]float64 {
 // 获取用户浏览记录
 func getUserViews(db *sql.DB, userID uint) []uint {
 	var views []uint
-	rows, err := db.Query("SELECT DISTINCT book_id FROM book_view WHERE user_id = ?", userID)
+	rows, err := db.Query("SELECT DISTINCT book_id FROM book_views WHERE user_id = ?", userID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -184,7 +179,7 @@ func getUserViews(db *sql.DB, userID uint) []uint {
 // 获取用户标签
 func getUserTags(db *sql.DB, userID uint) []uint {
 	var tags []uint
-	rows, err := db.Query("SELECT tag_id FROM user_tag WHERE user_id = ?", userID)
+	rows, err := db.Query("SELECT tag_id FROM user_tags WHERE user_id = ?", userID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -219,7 +214,24 @@ func getFollowedUsers(db *sql.DB, userID uint) []uint {
 	return followed
 }
 
-// 计算相似用户
+// 计算相似用户（协同过滤核心逻辑）
+// 参数：
+//
+//	db: 数据库连接
+//	userID: 目标用户ID
+//	userRatings: 目标用户评分数据（bookID -> rating）
+//	userViews: 目标用户浏览记录（bookID列表）
+//	userTags: 目标用户兴趣标签（tagID列表）
+//
+// 返回：
+//
+//	高相似度用户ID列表（前10名）
+//
+// 算法说明：
+//  1. 获取所有其他用户ID
+//  2. 对每个用户计算标签相似度（Jaccard）和评分相似度（余弦）
+//  3. 综合相似度 = 标签相似度*0.4 + 评分相似度*0.6
+//  4. 筛选相似度>0.3的用户，按相似度排序取前10
 func calculateSimilarUsers(db *sql.DB, userID uint, userRatings map[uint]float64, userViews []uint, userTags []uint) []uint {
 	type UserSimilarity struct {
 		UserID uint
@@ -249,7 +261,7 @@ func calculateSimilarUsers(db *sql.DB, userID uint, userRatings map[uint]float64
 		ratingSimilarity := calculateCosineSimilarity(userRatings, otherRatings)
 
 		// 综合相似度（加权平均）
-		combinedScore := tagSimilarity*0.4 + ratingSimilarity*0.6
+		combinedScore := tagSimilarity*0.3 + ratingSimilarity*0.7
 
 		if combinedScore > 0.3 { // 相似度阈值
 			similarUsers = append(similarUsers, UserSimilarity{
@@ -271,7 +283,15 @@ func calculateSimilarUsers(db *sql.DB, userID uint, userRatings map[uint]float64
 	return result
 }
 
-// 计算Jaccard相似度
+// 计算Jaccard相似度（用于标签相似性度量）
+// 参数：
+//
+//	setA: 标签集合A
+//	setB: 标签集合B
+//
+// 返回：
+//
+//	Jaccard相似度值（0-1之间，值越大越相似）
 func calculateJaccardSimilarity(setA, setB []uint) float64 {
 	intersection := make(map[uint]bool)
 	union := make(map[uint]bool)
@@ -294,7 +314,15 @@ func calculateJaccardSimilarity(setA, setB []uint) float64 {
 	return float64(len(intersection)) / float64(len(union))
 }
 
-// 计算余弦相似度
+// 计算余弦相似度（用于评分向量相似性度量）
+// 参数：
+//
+//	vecA: 评分向量A（bookID -> rating）
+//	vecB: 评分向量B（bookID -> rating）
+//
+// 返回：
+//
+//	余弦相似度值（0-1之间，值越大越相似）
 func calculateCosineSimilarity(vecA, vecB map[uint]float64) float64 {
 	dotProduct := 0.0
 	magnitudeA := 0.0
@@ -336,28 +364,31 @@ func calculateRecommendedBooks(db *sql.DB, userID uint, sourceUsers []uint, user
 	// 1. 从相似用户和关注用户的评分中获取推荐
 	if len(sourceUsers) > 0 {
 		// 将[]uint转换为逗号分隔的字符串
-		userIDsStr := "("
-		for i, id := range sourceUsers {
-			if i > 0 {
-				userIDsStr += ","
-			}
-			userIDsStr += fmt.Sprintf("%d", id)
+		placeholders := make([]string, len(sourceUsers))
+		for i := range sourceUsers {
+			placeholders[i] = "?"
 		}
-		userIDsStr += ")"
-
-		rows, err := db.Query(fmt.Sprintf(`
+		// 从相似用户中获取高评分书籍（暂不排除用户已评分/浏览的书籍）
+		query := fmt.Sprintf(`
 			SELECT r.book_id, AVG(r.rating_value) as avg_rating
-			FROM rating r
-			WHERE r.user_id IN %s AND r.rating_value >= 7
-			AND r.book_id NOT IN (
-				SELECT book_id FROM rating WHERE user_id = ?
-				UNION
-				SELECT book_id FROM book_view WHERE user_id = ?
-			)
-			GROUP BY r.book_id
-			ORDER BY avg_rating DESC
-			LIMIT 20
-		`, userIDsStr), userID, userID)
+			FROM ratings r
+			WHERE r.user_id IN (%s)  -- 相似用户ID列表
+				AND r.rating_value >= 7  -- 仅考虑评分≥7的书籍
+				-- AND r.book_id NOT IN (  -- 排除用户已交互的书籍（评分或浏览）
+				--	SELECT book_id FROM ratings WHERE user_id = ?
+				--	UNION
+				--	SELECT book_id FROM book_views WHERE user_id = ?
+				-- )
+			GROUP BY r.book_id  -- 按书籍分组计算平均评分
+			ORDER BY avg_rating DESC  -- 按平均评分降序排列
+			LIMIT 20  -- 取前20本
+		`, strings.Join(placeholders, ","))
+		args := make([]interface{}, 0, len(sourceUsers)+2) // 2是上面的排除已交互的两个占位符
+		for _, id := range sourceUsers {
+			args = append(args, id)
+		}
+		// args = append(args, userID, userID) // 上面sql的注释部分的两个占位符
+		rows, err := db.Query(query, args...)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -376,28 +407,30 @@ func calculateRecommendedBooks(db *sql.DB, userID uint, sourceUsers []uint, user
 	// 2. 从相似标签的书籍中获取推荐
 	if len(userTags) > 0 {
 		// 将[]uint转换为逗号分隔的字符串
-		tagIDsStr := "("
-		for i, id := range userTags {
-			if i > 0 {
-				tagIDsStr += ","
-			}
-			tagIDsStr += fmt.Sprintf("%d", id)
+		// 构建参数化查询避免SQL注入
+		placeholders := make([]string, len(userTags))
+		for i := range userTags {
+			placeholders[i] = "?"
 		}
-		tagIDsStr += ")"
-
-		rows, err := db.Query(fmt.Sprintf(`
+		query := fmt.Sprintf(`
 			SELECT b.book_id, COUNT(*) as tag_count
-			FROM book_tag b
-			WHERE b.tag_id IN %s
+			FROM book_tags b
+			WHERE b.tag_id IN (%s)
 			AND b.book_id NOT IN (
-				SELECT book_id FROM rating WHERE user_id = ?
+				SELECT book_id FROM ratings WHERE user_id = ?
 				UNION
-				SELECT book_id FROM book_view WHERE user_id = ?
+				SELECT book_id FROM book_views WHERE user_id = ?
 			)
 			GROUP BY b.book_id
 			ORDER BY tag_count DESC
 			LIMIT 20
-		`, tagIDsStr), userID, userID)
+		`, strings.Join(placeholders, ","))
+		args := make([]interface{}, 0, len(userTags)+2)
+		for _, id := range userTags {
+			args = append(args, id)
+		}
+		args = append(args, userID, userID)
+		rows, err := db.Query(query, args...)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -415,20 +448,21 @@ func calculateRecommendedBooks(db *sql.DB, userID uint, sourceUsers []uint, user
 
 	return recommendations
 }
+
 // 探索性推荐逻辑
 func getExplorationBooks(db *sql.DB, userID uint) map[uint]float64 {
 	explore := make(map[uint]float64)
 	rows, err := db.Query(`
 		SELECT b.book_id, r.avg_rating
-		FROM book_tag bt
+		FROM book_tags bt
 		JOIN (
 			SELECT book_id, AVG(rating_value) as avg_rating
-			FROM rating
+			FROM ratings
 			GROUP BY book_id
 			HAVING avg_rating >= 8.0
 		) r ON bt.book_id = r.book_id
 		WHERE bt.tag_id NOT IN (
-			SELECT tag_id FROM user_tag WHERE user_id = ?
+			SELECT tag_id FROM user_tags WHERE user_id = ?
 		)
 		ORDER BY r.avg_rating DESC
 		LIMIT 2`, userID)
@@ -444,13 +478,17 @@ func getExplorationBooks(db *sql.DB, userID uint) map[uint]float64 {
 	}
 	return explore
 }
+
 // 批量插入推荐结果
 func insertRecommendations(db *sql.DB, recommendations []Recommendation) {
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	if len(recommendations) == 0 {
+		log.Fatalln("recommendations is empty")
+		return
+	}
 	// 先清空旧数据
 	_, err = tx.Exec("TRUNCATE TABLE recommend")
 	if err != nil {
