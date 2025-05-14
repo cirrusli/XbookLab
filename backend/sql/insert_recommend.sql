@@ -5,13 +5,13 @@ INSERT INTO `recommend` (`user_id`, `book_id`, `score`, `update_at`) VALUES (1, 
 -- user_id=6
 INSERT INTO recommend (user_id, book_id, score, update_at)
 VALUES
-(6, 1, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 2, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 3, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 4, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 5, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 6, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 7, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 8, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 9, ROUND(7 + RAND() * 3, 2), NOW()),
-(6, 10, ROUND(7 + RAND() * 3, 2), NOW());
+(6, 1, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 2, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 3, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 4, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 5, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 6, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 7, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 8, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 9, ROUND(2 + RAND() * 3, 1), NOW()),
+(6, 10, ROUND(2 + RAND() * 3, 1), NOW());

@@ -37,9 +37,9 @@ func (r *Recommendation) TableName() string {
 func UpsertRecommendScore(userID uint, bookID uint, score float64) error {
 	return DB.Transaction(func(tx *gorm.DB) error {
 		err := tx.Exec(`
-			INSERT INTO recommend (user_id, book_id, score, updated)
+			INSERT INTO recommend (user_id, book_id, score, update_at)
 			VALUES (?, ?, ?, ?)
-			ON DUPLICATE KEY UPDATE score = score + ?, updated = ?
+			ON DUPLICATE KEY UPDATE score = score + ?, update_at = ?
 		`, userID, bookID, score, time.Now(), score, time.Now()).Error
 		return err
 	})
