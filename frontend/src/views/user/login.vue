@@ -72,7 +72,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const formData = reactive({
-  username: 'test051002',
+  username: '书友小李',
   password: '123456',
 });
 

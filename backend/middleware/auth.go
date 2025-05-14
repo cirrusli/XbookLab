@@ -35,7 +35,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "无效的令牌声明"})
 			return
 		}
-
+		c.Set("token", tokenString)
 		c.Set("userID", uint(claims["id"].(float64)))
 		c.Set("username", claims["username"].(string))
 		c.Next()

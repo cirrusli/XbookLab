@@ -2,7 +2,7 @@
   <!-- Left Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-section">
-      <h3 class="sidebar-title">分类筛选</h3>
+      <h3 class="sidebar-title">领域探索</h3>
       <div class="tag-cloud">
         <span
           v-for="(item, index) in menus"
@@ -22,7 +22,7 @@
   <!-- Right Content -->
   <div class="content">
     <section class="content-section">
-      <h2 class="section-title">热门话题</h2>
+      <h2 class="section-title">为你推荐</h2>
       <div class="topic-grid" id="topic-grid">
         <div
           class="topic-card"
@@ -43,7 +43,7 @@
     </section>
 
     <section class="content-section">
-      <h2 class="section-title">为你推荐</h2>
+      <h2 class="section-title">精选好书</h2>
       <div class="book-list">
         <div
           v-for="(item, index) in bookList"

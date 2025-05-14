@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 
 	"xbooklab/handlers"
@@ -15,7 +17,10 @@ import (
 
 func main() {
 	db := initMySQL()
-	rdb := initRedis()
+	rdb, err := initRedis()
+	if err != nil {
+		log.Println("Redis not ready",err)
+	}
 	models.SetDB(db, rdb)
 
 	r := InitRouter()
@@ -33,7 +38,7 @@ func InitRouter() *gin.Engine {
 	auth := r.Group("/api/auth")
 	{
 		auth.POST("/login", handlers.Login)
-		auth.POST("/logout", handlers.Logout)
+		auth.POST("/logout", middleware.AuthMiddleware(), handlers.Logout)
 		auth.POST("/change-password", middleware.AuthMiddleware(), handlers.ChangePassword)
 	}
 
@@ -102,7 +107,7 @@ func InitRouter() *gin.Engine {
 		like.POST("/topic", handlers.LikeTopic)
 	}
 
-	// 用户动态路由
+	// 用户动态路由--not implemented
 	event := r.Group("/api/event")
 	event.Use(middleware.AuthMiddleware())
 	{
@@ -118,7 +123,7 @@ func InitRouter() *gin.Engine {
 		tag.POST("/delete", handlers.DeleteTag)
 	}
 
-	// 用户管理路由
+	// 用户管理路由--not implemented
 	manager := r.Group("/api/manager")
 	manager.Use(middleware.AuthMiddleware())
 	{
@@ -145,10 +150,16 @@ func initMySQL() *gorm.DB {
 }
 
 // 初始化Redis连接
-func initRedis() *redis.Client {
-	return redis.NewClient(&redis.Options{
+func initRedis() (*redis.Client, error) {
+	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
+
+	// 检查连接是否正常
+	if err := client.Ping(context.Background()).Err(); err != nil {
+		return nil, fmt.Errorf("Redis连接失败: %v", err)
+	}
+	return client, nil
 }

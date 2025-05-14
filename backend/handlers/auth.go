@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"log"
 	"net/http"
 	"time"
 
@@ -35,14 +37,14 @@ func Login(c *gin.Context) {
 	var user models.User
 	if err := models.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"code": 401,
+			"code":  401,
 			"error": "用户名或密码错误"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"code": 401,
+			"code":  401,
 			"error": "用户名或密码错误"})
 		return
 	}
@@ -73,6 +75,15 @@ func Login(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	// 前端需要自行删除本地存储的token
+	// 后台需要把token加入redis的黑名单，key是userid，24小时过期
+	userID := c.MustGet("userID").(uint)
+	token := c.MustGet("token").(string)
+	err := models.RDB.Ping(context.Background()).Err()
+	if err == nil {
+		models.RDB.Set(context.Background(), string(userID), token, time.Hour*24)
+	} else {
+		log.Println("Logout: redis连接失败", err)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"code":    200,
 		"data":    "",
