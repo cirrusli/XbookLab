@@ -12,6 +12,26 @@ type Recommendation struct {
 	Updated time.Time
 }
 
+func GetRecommendedBooks(userID uint, limit int, offset int, tagFilter int) ([]Book, error) {
+	var books []Book
+	query := DB.Table("recommend").
+		Select("books.*, recommend.score").
+		Joins("JOIN books ON recommend.book_id = books.book_id").
+		Where("recommend.user_id = ?", userID)
+
+	if tagFilter > 0 {
+		query = query.Joins("JOIN book_tags ON recommend.book_id = book_tags.book_id").
+			Where("book_tags.tag_id = ?", tagFilter)
+	}
+
+	err := query.Order("recommend.score DESC").Offset(offset).Limit(limit).Find(&books).Error
+	return books, err
+}
+
+func (r *Recommendation) TableName() string {
+	return "recommend"
+}
+
 // 获取用户评分记录
 func GetUserRatings(userID uint) ([]Rating, error) {
 	var ratings []Rating
@@ -77,24 +97,4 @@ func FindSimilarUsers(userID uint, similarUsers []uint, excludeBooks []uint) ([]
 		Limit(20).
 		Find(&books).Error
 	return books, err
-}
-
-func GetRecommendedBooks(userID uint, limit int, offset int, tagFilter int) ([]Book, error) {
-	var books []Book
-	query := DB.Table("recommend").
-		Select("books.*, recommend.score").
-		Joins("JOIN books ON recommend.book_id = books.book_id").
-		Where("recommend.user_id = ?", userID)
-
-	if tagFilter > 0 {
-		query = query.Joins("JOIN book_tags ON recommend.book_id = book_tags.book_id").
-			Where("book_tags.tag_id = ?", tagFilter)
-	}
-
-	err := query.Order("recommend.score DESC").Offset(offset).Limit(limit).Find(&books).Error
-	return books, err
-}
-
-func (r *Recommendation) TableName() string {
-	return "recommend"
 }

@@ -17,14 +17,8 @@ type GetRecommendedBooksRequest struct {
 	TagFilter uint `json:"tag_filter"`
 }
 
-type GetRecommendedBooksResponse struct {
-	Books                []models.Book `json:"books"`
-	Algorithm            string        `json:"algorithm"`
-	RecommendationReason string        `json:"recommendation_reason"`
-}
-
 // 推荐补充开关
-var useStrategy bool = true
+var useStrategy bool = false
 
 // GetRecommendedBooks 实现书籍推荐逻辑
 func GetRecommendedBooks(c *gin.Context) {
